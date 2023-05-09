@@ -21,6 +21,8 @@ const navigation = [
   { name: "User", href: "/dashboard/User", icon: FolderIcon, current: false },
   { name: "Note", href: "/dashboard/Note", icon: FolderIcon, current: false },
   { name: "Category", href: "/dashboard/Category", icon: FolderIcon, current: false },
+  { name: "Transaction", href: "/dashboard/Transaction", icon: FolderIcon, current: false },
+  { name: "Payment", href: "/dashboard/Payment", icon: FolderIcon, current: false },
 ];
 
 const userNavigation = [
