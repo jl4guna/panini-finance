@@ -13,7 +13,24 @@ export function getPayment({
 }
 
 export function getPaymentListItems() {
-  return prisma.payment.findMany();
+  return prisma.payment.findMany({
+    select: {
+      id: true,
+      description: true,
+      amount: true,
+      sender: {
+        select: {
+          id: true,
+          email: true,
+      }},
+      receiver: {
+        select: {
+          id: true,
+          email: true,
+      }},
+      createdAt: true,
+    },
+  });
 }
 
 export function createPayment({

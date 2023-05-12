@@ -11,6 +11,7 @@ import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
 
 import { getUserListItems } from "~/models/dashboard/User.server";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
+import { addMissingDigit } from "~/utils";
 
 function getClassName(error: boolean) {
   const errorClasses =
@@ -18,7 +19,7 @@ function getClassName(error: boolean) {
   const normalClasses =
     "text-gray-900 shadow-sm ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600";
   const className =
-    "block w-full rounded-md border-0 py-1.5 pl-2 sm:text-sm sm:leading-6 focus:ring-inset ring-1 focus:ring-2 ring-inset ";
+    "block w-full rounded-md border-0 py-1.5 px-2 sm:text-sm sm:leading-6 focus:ring-inset ring-1 focus:ring-2 ring-inset ";
 
   return error ? className + errorClasses : className + normalClasses;
 }
@@ -76,6 +77,11 @@ export default function UpdateTransaction() {
   const { transaction, users, categories } = useLoaderData<typeof loader>();
   const errors = useActionData<typeof action>();
 
+  const birthDate = new Date(transaction?.date || "");
+  const formattedDate = `${birthDate.getUTCFullYear()}-${addMissingDigit(
+    birthDate.getUTCMonth() + 1
+  )}-${addMissingDigit(birthDate.getUTCDate())}`;
+
   return (
     <div>
       <h2>Update Transaction</h2>
@@ -121,14 +127,25 @@ export default function UpdateTransaction() {
                 Amount
               </label>
               <div className="relative mt-2">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <span className="text-gray-500 sm:text-sm">$</span>
+                </div>
                 <input
                   type="number"
                   id="amount"
                   name="amount"
                   defaultValue={transaction?.amount || ""}
-                  className={getClassName(Boolean(errors?.amount))}
+                  className={getClassName(Boolean(errors?.amount)) + " pl-7"}
                   required={true}
                 />
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                  <span
+                    className="text-gray-500 sm:text-sm"
+                    id="price-currency"
+                  >
+                    MXN
+                  </span>
+                </div>
                 {errors?.amount ? (
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                     <ExclamationCircleIcon
@@ -153,10 +170,10 @@ export default function UpdateTransaction() {
               </label>
               <div className="relative mt-2">
                 <input
-                  type="datetime-local"
+                  type="date"
                   id="date"
                   name="date"
-                  defaultValue={transaction?.date || ""}
+                  defaultValue={formattedDate}
                   className={getClassName(Boolean(errors?.date))}
                   required={true}
                 />
@@ -194,7 +211,7 @@ export default function UpdateTransaction() {
                   </option>
                   {users.map((option) => (
                     <option key={option.id} value={option.id}>
-                      {option.id}
+                      {option.email}
                     </option>
                   ))}
                 </select>
@@ -232,7 +249,7 @@ export default function UpdateTransaction() {
                   </option>
                   {categories.map((option) => (
                     <option key={option.id} value={option.id}>
-                      {option.id}
+                      {option.name}
                     </option>
                   ))}
                 </select>

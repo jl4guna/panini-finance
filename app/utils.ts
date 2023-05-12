@@ -69,3 +69,14 @@ export function useUser(): User {
 export function validateEmail(email: unknown): email is string {
   return typeof email === "string" && email.length > 3 && email.includes("@");
 }
+
+export function addMissingDigit(digit: number) {
+  return digit < 10 ? `0${digit}` : digit;
+}
+
+export function formatDate(date: string = "") {
+  const formattedDate = new Date(date);
+  return `${formattedDate.getUTCFullYear()}-${addMissingDigit(
+    formattedDate.getUTCMonth() + 1
+  )}-${addMissingDigit(formattedDate.getUTCDate())}`;
+}

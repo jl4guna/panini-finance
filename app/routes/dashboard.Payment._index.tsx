@@ -1,8 +1,8 @@
 import { Link, useLoaderData } from "@remix-run/react";
 import type { LoaderArgs } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
-import type { Payment as PaymentType } from "~/models/dashboard/Payment.server";
 import { getPaymentListItems } from "~/models/dashboard/Payment.server";
+import { formatDate } from "~/utils";
 
 export async function loader({ request }: LoaderArgs) {
   const payments = await getPaymentListItems();
@@ -10,7 +10,7 @@ export async function loader({ request }: LoaderArgs) {
   return json({ payments });
 }
 export default function Payment() {
-  const { payments } = useLoaderData<{ payments: PaymentType[] }>();
+  const { payments } = useLoaderData<typeof loader>();
 
   return (
     <div className="sm:px-6 lg:px-8">
@@ -41,15 +41,9 @@ export default function Payment() {
                   scope="col"
                   className="relative isolate py-3.5 pr-3 text-left text-sm font-semibold text-gray-900"
                 >
-                  ID
+                  Description
                   <div className="absolute inset-y-0 right-full -z-10 w-screen border-b border-b-gray-200" />
                   <div className="absolute inset-y-0 left-0 -z-10 w-screen border-b border-b-gray-200" />
-                </th>
-                <th
-                  scope="col"
-                  className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
-                >
-                  Description
                 </th>
                 <th
                   scope="col"
@@ -69,6 +63,12 @@ export default function Payment() {
                 >
                   Receiver
                 </th>
+                <th
+                  scope="col"
+                  className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+                >
+                  Date
+                </th>
                 <th scope="col" className="relative py-3.5 pl-3">
                   <span className="sr-only">Edit</span>
                 </th>
@@ -78,24 +78,21 @@ export default function Payment() {
               {payments.map((payment) => (
                 <tr key={payment.id}>
                   <td className="relative py-4 pr-3 text-sm font-medium text-gray-900">
-                    {payment.id}
+                    {payment.description}
                     <div className="absolute bottom-0 right-full h-px w-screen bg-gray-100" />
                     <div className="absolute bottom-0 left-0 h-px w-screen bg-gray-100" />
-                  </td>
-                  <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    {payment.description}
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
                     {payment.amount}
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    {payment.senderId}
+                    {payment.sender?.email}
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    {payment.receiverId}
+                    {payment.receiver?.email}
                   </td>
                   <td className="px-3 py-4 text-sm text-gray-500">
-                    {payment.createdAt}
+                    {formatDate(payment.createdAt)}
                   </td>
                   <td className="relative py-4 pl-3 text-right text-sm font-medium">
                     <Link

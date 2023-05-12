@@ -3,6 +3,7 @@ import type { LoaderArgs } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
 import type { Transaction as TransactionType } from "~/models/dashboard/Transaction.server";
 import { getTransactionListItems } from "~/models/dashboard/Transaction.server";
+import { formatDate } from "~/utils";
 
 export async function loader({ request }: LoaderArgs) {
   const transactions = await getTransactionListItems();
@@ -10,7 +11,7 @@ export async function loader({ request }: LoaderArgs) {
   return json({ transactions });
 }
 export default function Transaction() {
-  const { transactions } = useLoaderData<{ transactions: TransactionType[] }>();
+  const { transactions } = useLoaderData<typeof loader>();
 
   return (
     <div className="sm:px-6 lg:px-8">
@@ -41,15 +42,9 @@ export default function Transaction() {
                   scope="col"
                   className="relative isolate py-3.5 pr-3 text-left text-sm font-semibold text-gray-900"
                 >
-                  ID
+                  Description
                   <div className="absolute inset-y-0 right-full -z-10 w-screen border-b border-b-gray-200" />
                   <div className="absolute inset-y-0 left-0 -z-10 w-screen border-b border-b-gray-200" />
-                </th>
-                <th
-                  scope="col"
-                  className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
-                >
-                  Description
                 </th>
                 <th
                   scope="col"
@@ -84,27 +79,21 @@ export default function Transaction() {
               {transactions.map((transaction) => (
                 <tr key={transaction.id}>
                   <td className="relative py-4 pr-3 text-sm font-medium text-gray-900">
-                    {transaction.id}
+                    {transaction.description}
                     <div className="absolute bottom-0 right-full h-px w-screen bg-gray-100" />
                     <div className="absolute bottom-0 left-0 h-px w-screen bg-gray-100" />
-                  </td>
-                  <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    {transaction.description}
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
                     {transaction.amount}
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    {transaction.date}
+                    {formatDate(transaction.date)}
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    {transaction.userId}
+                    {transaction.user?.email}
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    {transaction.categoryId}
-                  </td>
-                  <td className="px-3 py-4 text-sm text-gray-500">
-                    {transaction.createdAt}
+                    {transaction.category?.name}
                   </td>
                   <td className="relative py-4 pl-3 text-right text-sm font-medium">
                     <Link

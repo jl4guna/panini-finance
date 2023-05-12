@@ -1,5 +1,5 @@
 import { Link, useActionData, Form, useLoaderData } from "@remix-run/react";
-import type { ActionArgs } from "@remix-run/server-runtime";
+import type { ActionArgs, LoaderArgs } from "@remix-run/server-runtime";
 import { redirect, json } from "@remix-run/server-runtime";
 import invariant from "tiny-invariant";
 import { createTransaction } from "~/models/dashboard/Transaction.server";
@@ -8,6 +8,7 @@ import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
 
 import { getUserListItems } from "~/models/dashboard/User.server";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
+import { addMissingDigit } from "~/utils";
 
 function getClassName(error: boolean) {
   const errorClasses =
@@ -15,7 +16,7 @@ function getClassName(error: boolean) {
   const normalClasses =
     "text-gray-900 shadow-sm ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600";
   const className =
-    "block w-full rounded-md border-0 py-1.5 pl-2 sm:text-sm sm:leading-6 focus:ring-inset ring-1 focus:ring-2 ring-inset ";
+    "block w-full rounded-md border-0 py-1.5 px-2 sm:text-sm sm:leading-6 focus:ring-inset ring-1 focus:ring-2 ring-inset ";
 
   return error ? className + errorClasses : className + normalClasses;
 }
@@ -55,18 +56,25 @@ export async function action({ request }: ActionArgs) {
   return redirect(`/dashboard/Transaction`);
 }
 
-export async function loader() {
+export async function loader({ request }: LoaderArgs) {
+  const currentUserId = await requireUserId(request);
   const users = await getUserListItems();
   const categories = await getCategoryListItems();
   return {
+    currentUserId,
     users,
     categories,
   };
 }
 
 export default function CreateTransaction() {
-  const { users, categories } = useLoaderData<typeof loader>();
+  const { currentUserId, users, categories } = useLoaderData<typeof loader>();
   const errors = useActionData<typeof action>();
+
+  const birthDate = new Date();
+  const formattedDate = `${birthDate.getUTCFullYear()}-${addMissingDigit(
+    birthDate.getUTCMonth() + 1
+  )}-${addMissingDigit(birthDate.getUTCDate())}`;
 
   return (
     <div>
@@ -86,6 +94,7 @@ export default function CreateTransaction() {
                   type="text"
                   id="description"
                   name="description"
+                  placeholder='e.g. "Lunch"'
                   defaultValue={""}
                   className={getClassName(Boolean(errors?.description))}
                   required={true}
@@ -113,14 +122,26 @@ export default function CreateTransaction() {
                 Amount
               </label>
               <div className="relative mt-2">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <span className="text-gray-500 sm:text-sm">$</span>
+                </div>
                 <input
                   type="number"
                   id="amount"
                   name="amount"
+                  placeholder="0.00"
                   defaultValue={""}
-                  className={getClassName(Boolean(errors?.amount))}
+                  className={getClassName(Boolean(errors?.amount)) + " pl-7"}
                   required={true}
                 />
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                  <span
+                    className="text-gray-500 sm:text-sm"
+                    id="price-currency"
+                  >
+                    MXN
+                  </span>
+                </div>
                 {errors?.amount ? (
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                     <ExclamationCircleIcon
@@ -145,10 +166,10 @@ export default function CreateTransaction() {
               </label>
               <div className="relative mt-2">
                 <input
-                  type="datetime-local"
+                  type="date"
                   id="date"
                   name="date"
-                  defaultValue={""}
+                  defaultValue={formattedDate}
                   className={getClassName(Boolean(errors?.date))}
                   required={true}
                 />
@@ -176,9 +197,10 @@ export default function CreateTransaction() {
               </label>
               <div className="relative mt-2">
                 <select
+                  required
                   id="userId"
                   name="userId"
-                  defaultValue={""}
+                  defaultValue={currentUserId}
                   className={getClassName(Boolean(errors?.userId))}
                 >
                   <option value="" disabled>
@@ -186,7 +208,7 @@ export default function CreateTransaction() {
                   </option>
                   {users.map((option) => (
                     <option key={option.id} value={option.id}>
-                      {option.id}
+                      {option.email}
                     </option>
                   ))}
                 </select>
@@ -214,6 +236,7 @@ export default function CreateTransaction() {
               </label>
               <div className="relative mt-2">
                 <select
+                  required
                   id="categoryId"
                   name="categoryId"
                   defaultValue={""}
@@ -224,7 +247,7 @@ export default function CreateTransaction() {
                   </option>
                   {categories.map((option) => (
                     <option key={option.id} value={option.id}>
-                      {option.id}
+                      {option.name}
                     </option>
                   ))}
                 </select>

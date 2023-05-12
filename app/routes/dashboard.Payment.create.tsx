@@ -19,15 +19,13 @@ function getClassName(error: boolean) {
 }
 
 export async function action({ request }: ActionArgs) {
-  const user = await requireUserId(request);
+  const userId = await requireUserId(request);
   const formData = await request.formData();
-  const { description, amount, senderId, receiverId } =
-    Object.fromEntries(formData);
+  const { description, amount, receiverId } = Object.fromEntries(formData);
 
   const errors = {
     description: description ? null : "Description is required",
     amount: amount ? null : "Amount is required",
-    senderId: senderId ? null : "Sender is required",
     receiverId: receiverId ? null : "Receiver is required",
   };
   const hasErrors = Object.values(errors).some((errorMessage) => errorMessage);
@@ -37,13 +35,13 @@ export async function action({ request }: ActionArgs) {
 
   invariant(typeof description === "string", "Invalid description");
   invariant(typeof amount === "string", "Invalid amount");
-  invariant(typeof senderId === "string", "Invalid senderId");
+  invariant(typeof userId === "string", "Invalid senderId");
   invariant(typeof receiverId === "string", "Invalid receiverId");
 
   await createPayment({
     description,
     amount: Number(amount),
-    senderId,
+    senderId: userId,
     receiverId,
   });
 
@@ -79,6 +77,7 @@ export default function CreatePayment() {
                   type="text"
                   id="description"
                   name="description"
+                  placeholder='e.g. "Pago + iPhone"'
                   defaultValue={""}
                   className={getClassName(Boolean(errors?.description))}
                   required={true}
@@ -106,14 +105,26 @@ export default function CreatePayment() {
                 Amount
               </label>
               <div className="relative mt-2">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <span className="text-gray-500 sm:text-sm">$</span>
+                </div>
                 <input
                   type="number"
                   id="amount"
                   name="amount"
+                  placeholder="0.00"
                   defaultValue={""}
-                  className={getClassName(Boolean(errors?.amount))}
+                  className={getClassName(Boolean(errors?.amount)) + " pl-7"}
                   required={true}
                 />
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                  <span
+                    className="text-gray-500 sm:text-sm"
+                    id="price-currency"
+                  >
+                    MXN
+                  </span>
+                </div>
                 {errors?.amount ? (
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                     <ExclamationCircleIcon
@@ -148,7 +159,7 @@ export default function CreatePayment() {
                   </option>
                   {receivers.map((option) => (
                     <option key={option.id} value={option.id}>
-                      {option.id}
+                      {option.email}
                     </option>
                   ))}
                 </select>
