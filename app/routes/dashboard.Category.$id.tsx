@@ -2,18 +2,21 @@ import { Link, useActionData, Form, useLoaderData } from "@remix-run/react";
 import type { ActionArgs, LoaderArgs } from "@remix-run/server-runtime";
 import { redirect, json } from "@remix-run/server-runtime";
 import invariant from "tiny-invariant";
-import { getCategory, updateCategory } from "~/models/dashboard/Category.server";
+import {
+  getCategory,
+  updateCategory,
+} from "~/models/dashboard/Category.server";
 import { requireUserId } from "~/session.server";
 import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
-
+import SelectIcon from "~/components/SelectIcon";
 
 function getClassName(error: boolean) {
   const errorClasses =
-  "pr-10 text-red-900 ring-red-300 placeholder:text-red-300 focus:ring-red-500 ";
+    "pr-10 text-red-900 ring-red-300 placeholder:text-red-300 focus:ring-red-500 ";
   const normalClasses =
-  "text-gray-900 shadow-sm ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600";
+    "text-gray-900 shadow-sm ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600";
   const className =
-  "block w-full rounded-md border-0 py-1.5 pl-2 sm:text-sm sm:leading-6 focus:ring-inset ring-1 focus:ring-2 ring-inset ";
+    "block w-full rounded-md border-0 py-1.5 pl-2 sm:text-sm sm:leading-6 focus:ring-inset ring-1 focus:ring-2 ring-inset ";
 
   return error ? className + errorClasses : className + normalClasses;
 }
@@ -22,11 +25,7 @@ export async function action({ request, params }: ActionArgs) {
   const id = params.id as string;
   const user = await requireUserId(request);
   const formData = await request.formData();
-  const {
-    name,
-    color,
-    icon,
-  } = Object.fromEntries(formData);
+  const { name, color, icon } = Object.fromEntries(formData);
 
   const errors = {
     name: name ? null : "Name is required",
@@ -53,16 +52,14 @@ export async function action({ request, params }: ActionArgs) {
 
 export async function loader({ params }: LoaderArgs) {
   const id = params.id as string;
-  const category = await getCategory({id});
+  const category = await getCategory({ id });
   return {
     category,
   };
 }
 
 export default function UpdateCategory() {
-  const {
-    category,
-  } = useLoaderData<typeof loader>();
+  const { category } = useLoaderData<typeof loader>();
   const errors = useActionData<typeof action>();
 
   return (
@@ -72,62 +69,92 @@ export default function UpdateCategory() {
         <div className="border-b border-gray-900/10 pb-12">
           <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
             <div className="sm:col-span-3">
-              <label htmlFor="name" className="block text-sm font-medium leading-6 text-gray-900">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
                 Name
               </label>
               <div className="relative mt-2">
-                <input type="text" id="name" name="name" defaultValue={ category?.name || ""}
-                  className={ getClassName(Boolean(errors?.name)) } required={ true } />
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  defaultValue={category?.name || ""}
+                  className={getClassName(Boolean(errors?.name))}
+                  required={true}
+                />
                 {errors?.name ? (
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                  <ExclamationCircleIcon className="h-5 w-5 text-red-500" aria-hidden="true" />
-                </div>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                    <ExclamationCircleIcon
+                      className="h-5 w-5 text-red-500"
+                      aria-hidden="true"
+                    />
+                  </div>
                 ) : null}
-                </div>
-                {errors?.name ? (
+              </div>
+              {errors?.name ? (
                 <p className="mt-2 text-sm text-red-600" id="email-error">
-                  {errors?.name }
+                  {errors?.name}
                 </p>
-                ) : null}
+              ) : null}
             </div>
             <div className="sm:col-span-3">
-              <label htmlFor="color" className="block text-sm font-medium leading-6 text-gray-900">
+              <label
+                htmlFor="color"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
                 Color
               </label>
               <div className="relative mt-2">
-                <input type="text" id="color" name="color" defaultValue={ category?.color || ""}
-                  className={ getClassName(Boolean(errors?.color)) } required={ true } />
+                <input
+                  type="color"
+                  id="color"
+                  name="color"
+                  defaultValue={category?.color || ""}
+                  required={true}
+                />
                 {errors?.color ? (
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                  <ExclamationCircleIcon className="h-5 w-5 text-red-500" aria-hidden="true" />
-                </div>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                    <ExclamationCircleIcon
+                      className="h-5 w-5 text-red-500"
+                      aria-hidden="true"
+                    />
+                  </div>
                 ) : null}
-                </div>
-                {errors?.color ? (
+              </div>
+              {errors?.color ? (
                 <p className="mt-2 text-sm text-red-600" id="email-error">
-                  {errors?.color }
+                  {errors?.color}
                 </p>
-                ) : null}
+              ) : null}
             </div>
             <div className="sm:col-span-3">
-              <label htmlFor="icon" className="block text-sm font-medium leading-6 text-gray-900">
+              <label
+                htmlFor="icon"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
                 Icon
               </label>
               <div className="relative mt-2">
-                <input type="text" id="icon" name="icon" defaultValue={ category?.icon || ""}
-                  className={ getClassName(false) } required={ false } />
-                </div>
+                <SelectIcon />
+              </div>
             </div>
           </div>
         </div>
         <div className="mt-6 flex items-center justify-end gap-x-6">
           <Link to="/dashboard/Category">
-          <button type="button" className="text-sm font-semibold leading-6 text-gray-900">
-            Cancel
-          </button>
+            <button
+              type="button"
+              className="text-sm font-semibold leading-6 text-gray-900"
+            >
+              Cancel
+            </button>
           </Link>
-          <button type="submit"
-            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+          <button
+            type="submit"
+            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
             Update Category
           </button>
         </div>

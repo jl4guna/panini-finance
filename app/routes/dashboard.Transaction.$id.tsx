@@ -8,10 +8,11 @@ import {
 } from "~/models/dashboard/Transaction.server";
 import { requireUserId } from "~/session.server";
 import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
-
+import Dinero from "dinero.js";
 import { getUserListItems } from "~/models/dashboard/User.server";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
-import { addMissingDigit } from "~/utils";
+import { addMissingDigit, extractAmount } from "~/utils";
+import { useState } from "react";
 
 function getClassName(error: boolean) {
   const errorClasses =
@@ -52,7 +53,7 @@ export async function action({ request, params }: ActionArgs) {
   await updateTransaction({
     id,
     description,
-    amount: Number(amount),
+    amount: extractAmount(amount),
     date: new Date(date),
     userId,
     categoryId,
@@ -81,6 +82,21 @@ export default function UpdateTransaction() {
   const formattedDate = `${birthDate.getUTCFullYear()}-${addMissingDigit(
     birthDate.getUTCMonth() + 1
   )}-${addMissingDigit(birthDate.getUTCDate())}`;
+
+  const initialAmount = Dinero({
+    amount: transaction?.amount || 0,
+  }).toFormat("0,0.00");
+  const [amount, setAmount] = useState(initialAmount);
+
+  function handleOnChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const { value } = event.target;
+
+    const amount = Dinero({
+      amount: extractAmount(value),
+    }).toFormat("0,0.00");
+
+    setAmount(amount);
+  }
 
   return (
     <div>
@@ -131,10 +147,11 @@ export default function UpdateTransaction() {
                   <span className="text-gray-500 sm:text-sm">$</span>
                 </div>
                 <input
-                  type="number"
+                  type="text"
                   id="amount"
                   name="amount"
-                  defaultValue={transaction?.amount || ""}
+                  value={amount}
+                  onChange={handleOnChange}
                   className={getClassName(Boolean(errors?.amount)) + " pl-7"}
                   required={true}
                 />

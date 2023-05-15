@@ -8,7 +8,9 @@ import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
 
 import { getUserListItems } from "~/models/dashboard/User.server";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
-import { addMissingDigit } from "~/utils";
+import { addMissingDigit, extractAmount } from "~/utils";
+import { useState } from "react";
+import Dinero from "dinero.js";
 
 function getClassName(error: boolean) {
   const errorClasses =
@@ -47,7 +49,7 @@ export async function action({ request }: ActionArgs) {
 
   await createTransaction({
     description,
-    amount: Number(amount),
+    amount: extractAmount(amount),
     date: new Date(date),
     userId,
     categoryId,
@@ -75,6 +77,18 @@ export default function CreateTransaction() {
   const formattedDate = `${birthDate.getUTCFullYear()}-${addMissingDigit(
     birthDate.getUTCMonth() + 1
   )}-${addMissingDigit(birthDate.getUTCDate())}`;
+
+  const [amount, setAmount] = useState("");
+
+  function handleOnChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const { value } = event.target;
+
+    const amount = Dinero({
+      amount: extractAmount(value),
+    }).toFormat("0,0.00");
+
+    setAmount(amount);
+  }
 
   return (
     <div>
@@ -126,11 +140,12 @@ export default function CreateTransaction() {
                   <span className="text-gray-500 sm:text-sm">$</span>
                 </div>
                 <input
-                  type="number"
+                  type="text"
                   id="amount"
                   name="amount"
                   placeholder="0.00"
-                  defaultValue={""}
+                  value={amount}
+                  onChange={handleOnChange}
                   className={getClassName(Boolean(errors?.amount)) + " pl-7"}
                   required={true}
                 />

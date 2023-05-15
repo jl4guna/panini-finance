@@ -80,3 +80,12 @@ export function formatDate(date: string = "") {
     formattedDate.getUTCMonth() + 1
   )}-${addMissingDigit(formattedDate.getUTCDate())}`;
 }
+
+export function classNames(...classes: string[]) {
+  return classes.filter(Boolean).join(' ')
+}
+
+export function extractAmount(amount: string) {
+  const regex = /[$,.]/g;
+  return Number(amount.replace(regex, ""));
+}

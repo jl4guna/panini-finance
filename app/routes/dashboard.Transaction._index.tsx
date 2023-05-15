@@ -1,9 +1,9 @@
 import { Link, useLoaderData } from "@remix-run/react";
 import type { LoaderArgs } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
-import type { Transaction as TransactionType } from "~/models/dashboard/Transaction.server";
 import { getTransactionListItems } from "~/models/dashboard/Transaction.server";
 import { formatDate } from "~/utils";
+import Dinero from "dinero.js";
 
 export async function loader({ request }: LoaderArgs) {
   const transactions = await getTransactionListItems();
@@ -84,7 +84,7 @@ export default function Transaction() {
                     <div className="absolute bottom-0 left-0 h-px w-screen bg-gray-100" />
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    {transaction.amount}
+                    {Dinero({ amount: transaction.amount }).toFormat("$0,0.00")}
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
                     {formatDate(transaction.date)}

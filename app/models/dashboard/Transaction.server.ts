@@ -13,6 +13,7 @@ export function getTransaction({
 }
 
 export function getTransactionListItems() {
+
   return prisma.transaction.findMany({
     select: {
       id: true,

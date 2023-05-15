@@ -5,15 +5,15 @@ import invariant from "tiny-invariant";
 import { createCategory } from "~/models/dashboard/Category.server";
 import { requireUserId } from "~/session.server";
 import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
-
+import SelectIcon from "~/components/SelectIcon";
 
 function getClassName(error: boolean) {
   const errorClasses =
-  "pr-10 text-red-900 ring-red-300 placeholder:text-red-300 focus:ring-red-500 ";
+    "pr-10 text-red-900 ring-red-300 placeholder:text-red-300 focus:ring-red-500 ";
   const normalClasses =
-  "text-gray-900 shadow-sm ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600";
+    "text-gray-900 shadow-sm ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600";
   const className =
-  "block w-full rounded-md border-0 py-1.5 pl-2 sm:text-sm sm:leading-6 focus:ring-inset ring-1 focus:ring-2 ring-inset ";
+    "block w-full rounded-md border-0 py-1.5 pl-2 sm:text-sm sm:leading-6 focus:ring-inset ring-1 focus:ring-2 ring-inset ";
 
   return error ? className + errorClasses : className + normalClasses;
 }
@@ -21,11 +21,7 @@ function getClassName(error: boolean) {
 export async function action({ request }: ActionArgs) {
   const user = await requireUserId(request);
   const formData = await request.formData();
-  const { 
-    name,
-    color,
-    icon,
-  } = Object.fromEntries(formData);
+  const { name, color, icon } = Object.fromEntries(formData);
 
   const errors = {
     name: name ? null : "Name is required",
@@ -50,15 +46,13 @@ export async function action({ request }: ActionArgs) {
 }
 
 export async function loader() {
-  return { 
-  };
+  return {};
 }
 
 export default function CreateCategory() {
-  const {
-  } = useLoaderData<typeof loader>();
+  const {} = useLoaderData<typeof loader>();
   const errors = useActionData<typeof action>();
-  
+
   return (
     <div>
       <h2>Create a new Category</h2>
@@ -66,62 +60,92 @@ export default function CreateCategory() {
         <div className="border-b border-gray-900/10 pb-12">
           <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
             <div className="sm:col-span-3">
-              <label htmlFor="name" className="block text-sm font-medium leading-6 text-gray-900">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
                 Name
               </label>
               <div className="relative mt-2">
-                <input type="text" id="name" name="name" defaultValue={""}
-                  className={ getClassName(Boolean(errors?.name)) } required={ true } />
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  defaultValue={""}
+                  className={getClassName(Boolean(errors?.name))}
+                  required={true}
+                />
                 {errors?.name ? (
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                  <ExclamationCircleIcon className="h-5 w-5 text-red-500" aria-hidden="true" />
-                </div>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                    <ExclamationCircleIcon
+                      className="h-5 w-5 text-red-500"
+                      aria-hidden="true"
+                    />
+                  </div>
                 ) : null}
               </div>
               {errors?.name ? (
-              <p className="mt-2 text-sm text-red-600" id="email-error">
-                {errors?.name }
-              </p>
+                <p className="mt-2 text-sm text-red-600" id="email-error">
+                  {errors?.name}
+                </p>
               ) : null}
             </div>
             <div className="sm:col-span-3">
-              <label htmlFor="color" className="block text-sm font-medium leading-6 text-gray-900">
+              <label
+                htmlFor="color"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
                 Color
               </label>
               <div className="relative mt-2">
-                <input type="text" id="color" name="color" defaultValue={""}
-                  className={ getClassName(Boolean(errors?.color)) } required={ true } />
+                <input
+                  type="color"
+                  id="color"
+                  name="color"
+                  defaultValue={""}
+                  required={true}
+                />
                 {errors?.color ? (
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                  <ExclamationCircleIcon className="h-5 w-5 text-red-500" aria-hidden="true" />
-                </div>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                    <ExclamationCircleIcon
+                      className="h-5 w-5 text-red-500"
+                      aria-hidden="true"
+                    />
+                  </div>
                 ) : null}
               </div>
               {errors?.color ? (
-              <p className="mt-2 text-sm text-red-600" id="email-error">
-                {errors?.color }
-              </p>
+                <p className="mt-2 text-sm text-red-600" id="email-error">
+                  {errors?.color}
+                </p>
               ) : null}
             </div>
             <div className="sm:col-span-3">
-              <label htmlFor="icon" className="block text-sm font-medium leading-6 text-gray-900">
+              <label
+                htmlFor="icon"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
                 Icon
               </label>
               <div className="relative mt-2">
-                <input type="text" id="icon" name="icon" defaultValue={""}
-                  className={ getClassName(false) } required={ false } />
+                <SelectIcon />
               </div>
             </div>
           </div>
         </div>
         <div className="mt-6 flex items-center justify-end gap-x-6">
           <Link to="/dashboard/Category">
-          <button type="button" className="text-sm font-semibold leading-6 text-gray-900">
-            Cancel
-          </button>
+            <button
+              type="button"
+              className="text-sm font-semibold leading-6 text-gray-900"
+            >
+              Cancel
+            </button>
           </Link>
-          <button type="submit"
-            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+          <button
+            type="submit"
+            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
             Create Category
           </button>
         </div>

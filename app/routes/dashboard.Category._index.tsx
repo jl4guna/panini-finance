@@ -1,6 +1,8 @@
+import { TagIcon } from "@heroicons/react/24/outline";
 import { Link, useLoaderData } from "@remix-run/react";
 import type { LoaderArgs } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
+import Icon from "~/components/Icon";
 import type { Category as CategoryType } from "~/models/dashboard/Category.server";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
 
@@ -70,11 +72,14 @@ export default function Category() {
                     <div className="absolute bottom-0 right-full h-px w-screen bg-gray-100" />
                     <div className="absolute bottom-0 left-0 h-px w-screen bg-gray-100" />
                   </td>
-                  <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                  <td
+                    className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell"
+                    style={{ color: category.color }}
+                  >
                     {category.color}
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    {category.icon}
+                    <Icon name={category.icon || ""} color={category.color} />
                   </td>
                   <td className="relative py-4 pl-3 text-right text-sm font-medium">
                     <Link

@@ -3,6 +3,7 @@ import type { LoaderArgs } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
 import { getPaymentListItems } from "~/models/dashboard/Payment.server";
 import { formatDate } from "~/utils";
+import Dinero from "dinero.js";
 
 export async function loader({ request }: LoaderArgs) {
   const payments = await getPaymentListItems();
@@ -83,7 +84,7 @@ export default function Payment() {
                     <div className="absolute bottom-0 left-0 h-px w-screen bg-gray-100" />
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    {payment.amount}
+                    {Dinero({ amount: payment.amount }).toFormat("$0,0.00")}
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
                     {payment.sender?.email}

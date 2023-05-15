@@ -6,6 +6,9 @@ import { createPayment } from "~/models/dashboard/Payment.server";
 import { requireUserId } from "~/session.server";
 import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
 import { getUserListItems } from "~/models/dashboard/User.server";
+import { useState } from "react";
+import Dinero from "dinero.js";
+import { extractAmount } from "~/utils";
 
 function getClassName(error: boolean) {
   const errorClasses =
@@ -40,7 +43,7 @@ export async function action({ request }: ActionArgs) {
 
   await createPayment({
     description,
-    amount: Number(amount),
+    amount: extractAmount(amount),
     senderId: userId,
     receiverId,
   });
@@ -58,6 +61,18 @@ export async function loader() {
 export default function CreatePayment() {
   const { receivers } = useLoaderData<typeof loader>();
   const errors = useActionData<typeof action>();
+
+  const [amount, setAmount] = useState("");
+
+  function handleOnChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const { value } = event.target;
+
+    const amount = Dinero({
+      amount: extractAmount(value),
+    }).toFormat("0,0.00");
+
+    setAmount(amount);
+  }
 
   return (
     <div>
@@ -109,11 +124,12 @@ export default function CreatePayment() {
                   <span className="text-gray-500 sm:text-sm">$</span>
                 </div>
                 <input
-                  type="number"
+                  type="text"
                   id="amount"
                   name="amount"
                   placeholder="0.00"
-                  defaultValue={""}
+                  onChange={handleOnChange}
+                  value={amount}
                   className={getClassName(Boolean(errors?.amount)) + " pl-7"}
                   required={true}
                 />
