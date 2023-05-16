@@ -137,7 +137,7 @@ export default function UpdateCategory() {
                 Icon
               </label>
               <div className="relative mt-2">
-                <SelectIcon />
+                <SelectIcon defaultIcon={category?.icon || ""} />
               </div>
             </div>
           </div>

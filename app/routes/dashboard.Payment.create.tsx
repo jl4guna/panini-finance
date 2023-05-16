@@ -1,5 +1,5 @@
 import { Link, useActionData, Form, useLoaderData } from "@remix-run/react";
-import type { ActionArgs } from "@remix-run/server-runtime";
+import type { ActionArgs, LoaderArgs } from "@remix-run/server-runtime";
 import { redirect, json } from "@remix-run/server-runtime";
 import invariant from "tiny-invariant";
 import { createPayment } from "~/models/dashboard/Payment.server";
@@ -51,10 +51,11 @@ export async function action({ request }: ActionArgs) {
   return redirect(`/dashboard/Payment`);
 }
 
-export async function loader() {
+export async function loader({ request }: LoaderArgs) {
+  const userId = await requireUserId(request);
   const receivers = await getUserListItems();
   return {
-    receivers,
+    receivers: receivers.filter((receiver) => receiver.id !== userId),
   };
 }
 
@@ -167,7 +168,7 @@ export default function CreatePayment() {
                 <select
                   id="receiverId"
                   name="receiverId"
-                  defaultValue={""}
+                  defaultValue={receivers[0].id}
                   className={getClassName(Boolean(errors?.receiverId))}
                 >
                   <option value="" disabled>

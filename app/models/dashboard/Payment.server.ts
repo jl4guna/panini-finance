@@ -14,6 +14,9 @@ export function getPayment({
 
 export function getPaymentListItems() {
   return prisma.payment.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
     select: {
       id: true,
       description: true,
@@ -77,4 +80,21 @@ export function deletePayment({
   return prisma.payment.deleteMany({
     where: { id },
   });
+}
+
+export async function getUserPaymentBalance(id: string){
+  const sent = await prisma.payment.aggregate({
+    where: { senderId: id },
+    _sum: { amount: true },
+  });
+  
+  const received = await prisma.payment.aggregate({
+    where: { receiverId: id },
+    _sum: { amount: true },
+  });
+
+  return {
+    sent: sent._sum.amount || 0,
+    received: received._sum.amount || 0,
+  }
 }

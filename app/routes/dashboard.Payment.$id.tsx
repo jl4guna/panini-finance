@@ -53,13 +53,14 @@ export async function action({ request, params }: ActionArgs) {
   return redirect(`/dashboard/Payment`);
 }
 
-export async function loader({ params }: LoaderArgs) {
+export async function loader({ params, request }: LoaderArgs) {
+  const userId = await requireUserId(request);
   const id = params.id as string;
   const payment = await getPayment({ id });
   const receivers = await getUserListItems();
   return {
     payment,
-    receivers,
+    receivers: receivers.filter((receiver) => receiver.id !== userId),
   };
 }
 

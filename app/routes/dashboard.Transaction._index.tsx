@@ -4,6 +4,7 @@ import { json } from "@remix-run/server-runtime";
 import { getTransactionListItems } from "~/models/dashboard/Transaction.server";
 import { formatDate } from "~/utils";
 import Dinero from "dinero.js";
+import Icon from "~/components/Icon";
 
 export async function loader({ request }: LoaderArgs) {
   const transactions = await getTransactionListItems();
@@ -66,7 +67,7 @@ export default function Transaction() {
                 </th>
                 <th
                   scope="col"
-                  className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+                  className="hidden px-3 py-3.5 text-center text-sm font-semibold text-gray-900 sm:table-cell"
                 >
                   Category
                 </th>
@@ -93,7 +94,13 @@ export default function Transaction() {
                     {transaction.user?.email}
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    {transaction.category?.name}
+                    <div className="flex items-center justify-center gap-2">
+                      <Icon
+                        name={transaction.category.icon || ""}
+                        color={transaction.category.color}
+                      />
+                      {transaction.category?.name}
+                    </div>
                   </td>
                   <td className="relative py-4 pl-3 text-right text-sm font-medium">
                     <Link

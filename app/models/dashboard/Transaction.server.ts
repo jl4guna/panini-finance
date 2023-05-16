@@ -15,6 +15,9 @@ export function getTransaction({
 export function getTransactionListItems() {
 
   return prisma.transaction.findMany({
+    orderBy: {
+      date: "desc",
+    },
     select: {
       id: true,
       description: true,
@@ -30,6 +33,8 @@ export function getTransactionListItems() {
         select: {
           id: true,
           name: true,
+          icon: true,
+          color: true,
         },
       },
     },
@@ -84,4 +89,21 @@ export function deleteTransaction({
   return prisma.transaction.deleteMany({
     where: { id },
   });
+}
+
+export async function getUserTransactionBalance(id: string){
+  const sum = await prisma.transaction.aggregate({
+    where: { userId: id },
+    _sum: { amount: true },
+  });
+
+  return sum._sum.amount || 0;
+}
+
+export async function getTotalSpent(){
+  const sum = await prisma.transaction.aggregate({
+    _sum: { amount: true },
+  });
+
+  return sum._sum.amount || 0;
 }
