@@ -1,10 +1,29 @@
 import { Link, useLoaderData } from "@remix-run/react";
-import type { LoaderArgs } from "@remix-run/server-runtime";
+import type { LoaderArgs, ActionArgs } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
-import { getTransactionListItems } from "~/models/dashboard/Transaction.server";
+import {
+  deleteTransaction,
+  getTransactionListItems,
+} from "~/models/dashboard/Transaction.server";
 import { formatDate } from "~/utils";
 import Dinero from "dinero.js";
 import Icon from "~/components/Icon";
+import type { Alert } from "~/components/ConfirmAlert";
+import ConfirmAlert from "~/components/ConfirmAlert";
+import { useState } from "react";
+import { requireUserId } from "~/session.server";
+import invariant from "tiny-invariant";
+
+export async function action({ request }: ActionArgs) {
+  await requireUserId(request);
+  const formData = await request.formData();
+  const { id } = Object.fromEntries(formData);
+
+  invariant(typeof id === "string", "Missing id");
+  await deleteTransaction({ id });
+
+  return json({ id });
+}
 
 export async function loader({ request }: LoaderArgs) {
   const transactions = await getTransactionListItems();
@@ -13,6 +32,11 @@ export async function loader({ request }: LoaderArgs) {
 }
 export default function Transaction() {
   const { transactions } = useLoaderData<typeof loader>();
+
+  const [openConfirm, setOpenConfirm] = useState<Alert>({
+    open: false,
+    action: "",
+  });
 
   return (
     <div className="sm:px-6 lg:px-8">
@@ -105,10 +129,21 @@ export default function Transaction() {
                   <td className="relative py-4 pl-3 text-right text-sm font-medium">
                     <Link
                       to={`/dashboard/Transaction/${transaction.id}`}
-                      className="text-indigo-600 hover:text-indigo-900"
+                      className="pr-2 text-indigo-600 hover:text-indigo-900"
                     >
                       Edit
                     </Link>
+                    <button
+                      onClick={() =>
+                        setOpenConfirm({
+                          open: true,
+                          action: transaction.id,
+                        })
+                      }
+                      className="text-red-600 hover:text-red-900"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -116,6 +151,11 @@ export default function Transaction() {
           </table>
         </div>
       </div>
+      <ConfirmAlert
+        type="transaction"
+        alert={openConfirm}
+        setAlert={setOpenConfirm}
+      />
     </div>
   );
 }

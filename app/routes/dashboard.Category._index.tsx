@@ -1,10 +1,26 @@
-import { TagIcon } from "@heroicons/react/24/outline";
 import { Link, useLoaderData } from "@remix-run/react";
-import type { LoaderArgs } from "@remix-run/server-runtime";
+import type { LoaderArgs, ActionArgs } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
+import { useState } from "react";
+import invariant from "tiny-invariant";
+import type { Alert } from "~/components/ConfirmAlert";
+import ConfirmAlert from "~/components/ConfirmAlert";
 import Icon from "~/components/Icon";
 import type { Category as CategoryType } from "~/models/dashboard/Category.server";
+import { deleteCategory } from "~/models/dashboard/Category.server";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
+import { requireUserId } from "~/session.server";
+
+export async function action({ request }: ActionArgs) {
+  await requireUserId(request);
+  const formData = await request.formData();
+  const { id } = Object.fromEntries(formData);
+
+  invariant(typeof id === "string", "Missing id");
+  await deleteCategory({ id });
+
+  return json({ id });
+}
 
 export async function loader({ request }: LoaderArgs) {
   const categories = await getCategoryListItems();
@@ -13,6 +29,11 @@ export async function loader({ request }: LoaderArgs) {
 }
 export default function Category() {
   const { categories } = useLoaderData<{ categories: CategoryType[] }>();
+
+  const [openConfirm, setOpenConfirm] = useState<Alert>({
+    open: false,
+    action: "",
+  });
 
   return (
     <div className="sm:px-6 lg:px-8">
@@ -84,10 +105,21 @@ export default function Category() {
                   <td className="relative py-4 pl-3 text-right text-sm font-medium">
                     <Link
                       to={`/dashboard/Category/${category.id}`}
-                      className="text-indigo-600 hover:text-indigo-900"
+                      className="pr-2 text-indigo-600 hover:text-indigo-900"
                     >
                       Edit
                     </Link>
+                    <button
+                      onClick={() =>
+                        setOpenConfirm({
+                          open: true,
+                          action: category.id,
+                        })
+                      }
+                      className="text-red-600 hover:text-red-900"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -95,6 +127,12 @@ export default function Category() {
           </table>
         </div>
       </div>
+
+      <ConfirmAlert
+        type="category"
+        alert={openConfirm}
+        setAlert={setOpenConfirm}
+      />
     </div>
   );
 }
