@@ -42,7 +42,7 @@ export default function Transaction() {
     <div className="sm:px-6 lg:px-8">
       <div className="flex items-center justify-between">
         <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900">Transaction</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Gastos</h1>
           <p className="mt-2 text-sm text-gray-700">
             A list of all the transactions.
           </p>

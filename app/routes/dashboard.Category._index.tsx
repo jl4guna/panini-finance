@@ -39,7 +39,7 @@ export default function Category() {
     <div className="sm:px-6 lg:px-8">
       <div className="flex items-center justify-between">
         <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900">Category</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Categorías</h1>
           <p className="mt-2 text-sm text-gray-700">
             A list of all the categories.
           </p>

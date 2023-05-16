@@ -25,12 +25,13 @@ export async function action({ request }: ActionArgs) {
 }
 
 export async function loader({ request }: LoaderArgs) {
+  const currentUserId = await requireUserId(request);
   const payments = await getPaymentListItems();
 
-  return json({ payments });
+  return json({ payments, currentUserId });
 }
 export default function Payment() {
-  const { payments } = useLoaderData<typeof loader>();
+  const { payments, currentUserId } = useLoaderData<typeof loader>();
 
   const [openConfirm, setOpenConfirm] = useState<Alert>({
     open: false,
@@ -41,7 +42,7 @@ export default function Payment() {
     <div className="sm:px-6 lg:px-8">
       <div className="flex items-center justify-between">
         <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900">Payment</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Pagos</h1>
           <p className="mt-2 text-sm text-gray-700">
             A list of all the payments.
           </p>
@@ -119,25 +120,27 @@ export default function Payment() {
                   <td className="px-3 py-4 text-sm text-gray-500">
                     {formatDate(payment.createdAt)}
                   </td>
-                  <td className="relative py-4 pl-3 text-right text-sm font-medium">
-                    <Link
-                      to={`/dashboard/Payment/${payment.id}`}
-                      className="pr-2 text-indigo-600 hover:text-indigo-900"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() =>
-                        setOpenConfirm({
-                          open: true,
-                          action: payment.id,
-                        })
-                      }
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Delete
-                    </button>
-                  </td>
+                  {currentUserId === payment?.sender.id ? (
+                    <td className="relative py-4 pl-3 text-right text-sm font-medium">
+                      <Link
+                        to={`/dashboard/Payment/${payment.id}`}
+                        className="pr-2 text-indigo-600 hover:text-indigo-900"
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        onClick={() =>
+                          setOpenConfirm({
+                            open: true,
+                            action: payment.id,
+                          })
+                        }
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  ) : null}
                 </tr>
               ))}
             </tbody>

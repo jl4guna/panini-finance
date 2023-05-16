@@ -46,13 +46,39 @@ export default function Dashboard() {
   const { totalPerUser, transactions, paymentsBalance, userBalance } =
     useLoaderData();
 
+  const status = (balance: number) => {
+    if (balance > 0) {
+      return { status: "te deben", color: "text-green-600" };
+    } else if (balance < 0) {
+      return { status: "debes", color: "text-red-600" };
+    } else {
+      return { status: "estás a mano", color: "text-gray-600" };
+    }
+  };
+
   return (
     <div>
       <section
         aria-labelledby="summary-heading"
         className="mt-16 rounded-lg bg-gray-50 px-4 py-6 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8"
       >
-        <h2
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+          Hola Elisa, {status(userBalance).status}:
+        </h1>
+
+        <div className="mt-3">
+          <p
+            className={
+              "text-3xl tracking-tight text-gray-900 " +
+              status(userBalance).color
+            }
+          >
+            {Dinero({ amount: userBalance })
+              .toFormat("$0,0.00")
+              .replace("-", "")}
+          </p>
+        </div>
+        {/* <h2
           id="summary-heading"
           className="text-center text-lg font-medium text-gray-900"
         >
@@ -84,7 +110,7 @@ export default function Dashboard() {
               {Dinero({ amount: userBalance }).toFormat("$0,0.00")}
             </dd>
           </div>
-        </dl>
+        </dl> */}
       </section>
     </div>
   );

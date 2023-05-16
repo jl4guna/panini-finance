@@ -1,11 +1,9 @@
-import { Outlet } from "@remix-run/react";
+import { Form, Outlet, useLoaderData } from "@remix-run/react";
 
 import { Fragment, useState } from "react";
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   Bars3Icon,
-  BellIcon,
-  Cog6ToothIcon,
   CreditCardIcon,
   HomeIcon,
   ShoppingBagIcon,
@@ -16,23 +14,26 @@ import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
+import type { LoaderArgs } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
+import { getUser, getUserId } from "~/session.server";
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: HomeIcon, current: true },
+  { name: "Balance", href: "/dashboard", icon: HomeIcon, current: true },
   {
-    name: "Category",
+    name: "Categorías",
     href: "/dashboard/Category",
     icon: TagIcon,
     current: false,
   },
   {
-    name: "Transaction",
+    name: "Gastos",
     href: "/dashboard/Transaction",
     icon: ShoppingBagIcon,
     current: false,
   },
   {
-    name: "Payment",
+    name: "Pagos",
     href: "/dashboard/Payment",
     icon: CreditCardIcon,
     current: false,
@@ -48,7 +49,15 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+export async function loader({ request }: LoaderArgs) {
+  const user = await getUser(request);
+  if (!user) return redirect("/");
+  return json({ user });
+}
+
 export default function Dashboard() {
+  const { user } = useLoaderData();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <>
@@ -145,16 +154,14 @@ export default function Dashboard() {
                           </ul>
                         </li>
                         <li className="mt-auto">
-                          <a
-                            href="/"
-                            className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
-                          >
-                            <Cog6ToothIcon
-                              className="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
-                              aria-hidden="true"
-                            />
-                            Settings
-                          </a>
+                          <Form action="/logout" method="post">
+                            <button
+                              type="submit"
+                              className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+                            >
+                              Logout
+                            </button>
+                          </Form>
                         </li>
                       </ul>
                     </nav>
@@ -207,16 +214,14 @@ export default function Dashboard() {
                   </ul>
                 </li>
                 <li className="mt-auto">
-                  <a
-                    href="/"
-                    className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
-                  >
-                    <Cog6ToothIcon
-                      className="h-6 w-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
-                      aria-hidden="true"
-                    />
-                    Settings
-                  </a>
+                  <Form action="/logout" method="post">
+                    <button
+                      type="submit"
+                      className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+                    >
+                      Logout
+                    </button>
+                  </Form>
                 </li>
               </ul>
             </nav>
@@ -259,14 +264,6 @@ export default function Dashboard() {
                   />
                 </form>
                 <div className="flex items-center gap-x-4 lg:gap-x-6">
-                  <button
-                    type="button"
-                    className="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500"
-                  >
-                    <span className="sr-only">View notifications</span>
-                    <BellIcon className="h-6 w-6" aria-hidden="true" />
-                  </button>
-
                   {/* Separator */}
                   <div
                     className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200"
@@ -277,17 +274,12 @@ export default function Dashboard() {
                   <Menu as="div" className="relative">
                     <Menu.Button className="-m-1.5 flex items-center p-1.5">
                       <span className="sr-only">Open user menu</span>
-                      <img
-                        className="h-8 w-8 rounded-full bg-gray-50"
-                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                        alt=""
-                      />
                       <span className="hidden lg:flex lg:items-center">
                         <span
                           className="ml-4 text-sm font-semibold leading-6 text-gray-900"
                           aria-hidden="true"
                         >
-                          Tom Cook
+                          {user.email}
                         </span>
                         <ChevronDownIcon
                           className="ml-2 h-5 w-5 text-gray-400"
