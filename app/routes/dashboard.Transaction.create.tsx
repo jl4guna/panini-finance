@@ -8,8 +8,8 @@ import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
 
 import { getUserListItems } from "~/models/dashboard/User.server";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
-import { addMissingDigit, extractAmount } from "~/utils";
-import { useState } from "react";
+import { addMissingDigit, extractAmount, generateFormRandomId } from "~/utils";
+import { useEffect, useState } from "react";
 import Dinero from "dinero.js";
 
 function getClassName(error: boolean) {
@@ -26,7 +26,7 @@ function getClassName(error: boolean) {
 export async function action({ request }: ActionArgs) {
   const user = await requireUserId(request);
   const formData = await request.formData();
-  const { description, amount, date, userId, categoryId } =
+  const { description, amount, date, userId, categoryId, action } =
     Object.fromEntries(formData);
 
   const errors = {
@@ -46,6 +46,7 @@ export async function action({ request }: ActionArgs) {
   invariant(typeof date === "string", "Invalid date");
   invariant(typeof userId === "string", "Invalid userId");
   invariant(typeof categoryId === "string", "Invalid categoryId");
+  invariant(typeof action === "string", "Invalid action");
 
   await createTransaction({
     description,
@@ -55,6 +56,10 @@ export async function action({ request }: ActionArgs) {
     categoryId,
   });
 
+  if (action === "createAndAddAnother") {
+    return redirect(`/dashboard/Transaction/create`);
+  }
+
   return redirect(`/dashboard/Transaction`);
 }
 
@@ -62,7 +67,10 @@ export async function loader({ request }: LoaderArgs) {
   const currentUserId = await requireUserId(request);
   const users = await getUserListItems();
   const categories = await getCategoryListItems();
+  const formRandomId = generateFormRandomId();
+
   return {
+    formRandomId,
     currentUserId,
     users,
     categories,
@@ -70,7 +78,8 @@ export async function loader({ request }: LoaderArgs) {
 }
 
 export default function CreateTransaction() {
-  const { currentUserId, users, categories } = useLoaderData<typeof loader>();
+  const { formRandomId, currentUserId, users, categories } =
+    useLoaderData<typeof loader>();
   const errors = useActionData<typeof action>();
 
   const birthDate = new Date();
@@ -90,10 +99,14 @@ export default function CreateTransaction() {
     setAmount(amount);
   }
 
+  useEffect(() => {
+    setAmount("");
+  }, [formRandomId]);
+
   return (
     <div>
-      <h2>Create a new Transaction</h2>
-      <Form method="post">
+      <h1 className="text-xl font-semibold text-gray-900">Gastos</h1>
+      <Form key={formRandomId} method="post">
         <div className="border-b border-gray-900/10 pb-12">
           <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
             <div className="sm:col-span-3">
@@ -101,7 +114,7 @@ export default function CreateTransaction() {
                 htmlFor="description"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
-                Description
+                Descripción
               </label>
               <div className="relative mt-2">
                 <input
@@ -133,7 +146,7 @@ export default function CreateTransaction() {
                 htmlFor="amount"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
-                Amount
+                Cantidad
               </label>
               <div className="relative mt-2">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -177,7 +190,7 @@ export default function CreateTransaction() {
                 htmlFor="date"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
-                Date
+                Fecha
               </label>
               <div className="relative mt-2">
                 <input
@@ -208,7 +221,7 @@ export default function CreateTransaction() {
                 htmlFor="userId"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
-                User
+                Pagante
               </label>
               <div className="relative mt-2">
                 <select
@@ -247,7 +260,7 @@ export default function CreateTransaction() {
                 htmlFor="categoryId"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
-                Category
+                Categoría
               </label>
               <div className="relative mt-2">
                 <select
@@ -258,7 +271,7 @@ export default function CreateTransaction() {
                   className={getClassName(Boolean(errors?.categoryId))}
                 >
                   <option value="" disabled>
-                    Select category
+                    Seleccionar categoría
                   </option>
                   {categories.map((option) => (
                     <option key={option.id} value={option.id}>
@@ -289,14 +302,24 @@ export default function CreateTransaction() {
               type="button"
               className="text-sm font-semibold leading-6 text-gray-900"
             >
-              Cancel
+              Cancelar
             </button>
           </Link>
           <button
             type="submit"
+            name="action"
+            value="create"
             className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
-            Create Transaction
+            Registar Gasto
+          </button>
+          <button
+            type="submit"
+            name="action"
+            value="createAndAddAnother"
+            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
+            Registar y Agregar otro
           </button>
         </div>
       </Form>

@@ -2,6 +2,9 @@ import { useMatches } from "@remix-run/react";
 import { useMemo } from "react";
 
 import type { User } from "~/models/user.server";
+import { getTotalSpent, getUserTransactionBalance } from './models/dashboard/Transaction.server';
+import { getUserPaymentBalance } from './models/dashboard/Payment.server';
+import Dinero from 'dinero.js';
 
 const DEFAULT_REDIRECT = "/";
 
@@ -88,4 +91,52 @@ export function classNames(...classes: string[]) {
 export function extractAmount(amount: string) {
   const regex = /[$,.]/g;
   return Number(amount.replace(regex, ""));
+}
+
+
+export async function getUserBalance(userId: string) {
+  const transactions = await getUserTransactionBalance(userId);
+  const payments = await getUserPaymentBalance(userId);
+  const totalSpent = await getTotalSpent();
+
+  const totalPerUser = Dinero({
+    amount: totalSpent,
+  }).divide(2);
+
+  const paymentsBalance = Dinero({ amount: payments.sent }).subtract(
+    Dinero({ amount: payments.received })
+  );
+
+  const userBalance = Dinero({ amount: transactions })
+    .add(paymentsBalance)
+    .subtract(totalPerUser);
+
+  console.log({
+    totalPerUser: totalPerUser.getAmount(),
+    transactions,
+    paymentsBalance: paymentsBalance.getAmount(),
+    userBalance: userBalance.getAmount(),
+  });
+
+  const status = (balance: number) => {
+    if (balance > 0) {
+      return { text: "te deben", color: "text-green-600" };
+    } else if (balance < 0) {
+      return { text: "debes", color: "text-red-600" };
+    } else {
+      return { text: "estás a mano", color: "text-gray-600" };
+    }
+  };
+
+  return {
+    totalPerUser: totalPerUser.getAmount(),
+    transactions,
+    paymentsBalance: paymentsBalance.getAmount(),
+    balance: userBalance.getAmount(),
+    status: status(userBalance.getAmount()),
+  };
+}
+
+export function generateFormRandomId() {
+  return Math.random().toString(36).substring(2, 15);
 }

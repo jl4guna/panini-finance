@@ -8,7 +8,7 @@ import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
 import { getUserListItems } from "~/models/dashboard/User.server";
 import { useState } from "react";
 import Dinero from "dinero.js";
-import { extractAmount } from "~/utils";
+import { extractAmount, getUserBalance } from "~/utils";
 
 function getClassName(error: boolean) {
   const errorClasses =
@@ -54,16 +54,25 @@ export async function action({ request }: ActionArgs) {
 export async function loader({ request }: LoaderArgs) {
   const userId = await requireUserId(request);
   const receivers = await getUserListItems();
+  const userBalance = await getUserBalance(userId);
+
   return {
     receivers: receivers.filter((receiver) => receiver.id !== userId),
+    userBalance,
   };
 }
 
 export default function CreatePayment() {
-  const { receivers } = useLoaderData<typeof loader>();
+  const { receivers, userBalance } = useLoaderData<typeof loader>();
   const errors = useActionData<typeof action>();
 
-  const [amount, setAmount] = useState("");
+  const defaultAmount = Dinero({ amount: userBalance.balance })
+    .toFormat("0,0.00")
+    .replace("-", "");
+
+  const [amount, setAmount] = useState(
+    userBalance.balance < 0 ? defaultAmount : ""
+  );
 
   function handleOnChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { value } = event.target;
@@ -77,7 +86,21 @@ export default function CreatePayment() {
 
   return (
     <div>
-      <h2>Create a new Payment</h2>
+      <h1 className="text-xl font-semibold text-gray-900">Pagos</h1>
+      <div className="border-b border-gray-100 px-4 py-6 sm:col-span-1 sm:px-0">
+        <p className="text-sm font-medium leading-6 text-gray-900">
+          Hola, {userBalance.status.text}
+        </p>
+        <p
+          className={
+            "mt-1 text-sm leading-6  sm:mt-2 " + userBalance.status.color
+          }
+        >
+          {Dinero({ amount: userBalance.balance })
+            .toFormat("$0,0.00")
+            .replace("-", "")}
+        </p>
+      </div>
       <Form method="post">
         <div className="border-b border-gray-900/10 pb-12">
           <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
@@ -86,14 +109,14 @@ export default function CreatePayment() {
                 htmlFor="description"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
-                Description
+                Descripción
               </label>
               <div className="relative mt-2">
                 <input
                   type="text"
                   id="description"
                   name="description"
-                  placeholder='e.g. "Pago + iPhone"'
+                  placeholder='e.g. "Pago Eli"'
                   defaultValue={""}
                   className={getClassName(Boolean(errors?.description))}
                   required={true}
@@ -118,7 +141,7 @@ export default function CreatePayment() {
                 htmlFor="amount"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
-                Amount
+                Cantidad
               </label>
               <div className="relative mt-2">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -162,7 +185,7 @@ export default function CreatePayment() {
                 htmlFor="receiverId"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
-                Receiver
+                Destinatario
               </label>
               <div className="relative mt-2">
                 <select
@@ -203,14 +226,14 @@ export default function CreatePayment() {
               type="button"
               className="text-sm font-semibold leading-6 text-gray-900"
             >
-              Cancel
+              Cancelar
             </button>
           </Link>
           <button
             type="submit"
             className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
-            Create Payment
+            Pagar
           </button>
         </div>
       </Form>

@@ -44,7 +44,7 @@ export default function Payment() {
         <div className="sm:flex-auto">
           <h1 className="text-xl font-semibold text-gray-900">Pagos</h1>
           <p className="mt-2 text-sm text-gray-700">
-            A list of all the payments.
+            Registro de pagos realizados
           </p>
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
@@ -53,7 +53,7 @@ export default function Payment() {
               type="button"
               className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
             >
-              Add Payment
+              Pagar
             </button>
           </Link>
         </div>
@@ -67,7 +67,7 @@ export default function Payment() {
                   scope="col"
                   className="relative isolate py-3.5 pr-3 text-left text-sm font-semibold text-gray-900"
                 >
-                  Description
+                  Descripción
                   <div className="absolute inset-y-0 right-full -z-10 w-screen border-b border-b-gray-200" />
                   <div className="absolute inset-y-0 left-0 -z-10 w-screen border-b border-b-gray-200" />
                 </th>
@@ -75,28 +75,28 @@ export default function Payment() {
                   scope="col"
                   className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
                 >
-                  Amount
+                  Cantidad
                 </th>
                 <th
                   scope="col"
                   className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
                 >
-                  Sender
+                  Pagado por
                 </th>
                 <th
                   scope="col"
                   className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
                 >
-                  Receiver
+                  Pagado a
                 </th>
                 <th
                   scope="col"
                   className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
                 >
-                  Date
+                  Fecha
                 </th>
                 <th scope="col" className="relative py-3.5 pl-3">
-                  <span className="sr-only">Edit</span>
+                  <span className="sr-only">Editar</span>
                 </th>
               </tr>
             </thead>
@@ -126,7 +126,7 @@ export default function Payment() {
                         to={`/dashboard/Payment/${payment.id}`}
                         className="pr-2 text-indigo-600 hover:text-indigo-900"
                       >
-                        Edit
+                        Editar
                       </Link>
                       <button
                         onClick={() =>
@@ -137,7 +137,7 @@ export default function Payment() {
                         }
                         className="text-red-600 hover:text-red-900"
                       >
-                        Delete
+                        Borrar
                       </button>
                     </td>
                   ) : null}
