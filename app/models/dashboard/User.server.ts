@@ -18,9 +18,11 @@ export function getUserListItems() {
 
 export function createUser({
   email,
-}: Pick<User, "email">) {
+  name,
+}: Pick<User, "email" | "name">) {
   let data = {
     email,
+    name,
   };
 
   return prisma.user.create({
@@ -31,9 +33,11 @@ export function createUser({
 export function updateUser({
   id,
   email,
-}: Pick<User, "id" | "email">) {
+  name,
+}: Pick<User, "id" | "email" | "name">) {
   let data = {
     email,
+    name,
   };
 
   return prisma.user.updateMany({

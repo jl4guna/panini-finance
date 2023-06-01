@@ -8,9 +8,9 @@ import { createUserSession, getUserId } from "~/session.server";
 import { safeRedirect, validateEmail } from "~/utils";
 
 export const loader = async ({ request }: LoaderArgs) => {
-  const userId = await getUserId(request);
-  if (userId) return redirect("/");
-  return json({});
+  // const userId = await getUserId(request);
+  // if (userId) return redirect("/");
+  return redirect("/");
 };
 
 export const action = async ({ request }: ActionArgs) => {

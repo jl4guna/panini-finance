@@ -1,17 +1,22 @@
 import Dinero from "dinero.js";
 import type { LoaderArgs } from "@remix-run/node";
-import { requireUserId } from "~/session.server";
+import { requireUser } from "~/session.server";
 import { useLoaderData } from "@remix-run/react";
 import { getUserBalance } from "~/utils";
 
 export async function loader({ request }: LoaderArgs) {
-  const userId = await requireUserId(request);
+  const user = await requireUser(request);
+  const { balance, status } = await getUserBalance(user.id);
 
-  return await getUserBalance(userId);
+  return {
+    balance,
+    user,
+    status,
+  };
 }
 
 export default function Dashboard() {
-  const { balance, status } = useLoaderData<typeof loader>();
+  const { balance, status, user } = useLoaderData<typeof loader>();
 
   return (
     <div>
@@ -20,7 +25,7 @@ export default function Dashboard() {
         className="mt-16 rounded-lg bg-gray-50 px-4 py-6 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8"
       >
         <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-          Hola Elisa, {status.text}:
+          Hola {user.name}, {status.text}:
         </h1>
 
         <div className="mt-3">
