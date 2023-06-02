@@ -71,7 +71,7 @@ export default function Transaction() {
                 </th>
                 <th
                   scope="col"
-                  className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
                 >
                   Cantidad
                 </th>
@@ -89,11 +89,20 @@ export default function Transaction() {
                 </th>
                 <th
                   scope="col"
+                  className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+                >
+                  Panini
+                </th>
+                <th
+                  scope="col"
                   className="hidden px-3 py-3.5 text-center text-sm font-semibold text-gray-900 sm:table-cell"
                 >
                   Categoría
                 </th>
-                <th scope="col" className="relative py-3.5 pl-3">
+                <th
+                  scope="col"
+                  className="relative hidden py-3.5 pl-3 sm:table-cell"
+                >
                   <span className="sr-only">Edit</span>
                 </th>
               </tr>
@@ -106,7 +115,7 @@ export default function Transaction() {
                     <div className="absolute bottom-0 right-full h-px w-screen bg-gray-100" />
                     <div className="absolute bottom-0 left-0 h-px w-screen bg-gray-100" />
                   </td>
-                  <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                  <td className="px-3 py-4 text-sm text-gray-500 sm:table-cell">
                     {Dinero({ amount: transaction.amount }).toFormat("$0,0.00")}
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
@@ -114,6 +123,9 @@ export default function Transaction() {
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
                     {transaction.user?.email}
+                  </td>
+                  <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                    {transaction.panini ? "Si" : "No"}
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
                     <div className="flex items-center justify-center gap-2">
@@ -124,7 +136,7 @@ export default function Transaction() {
                       {transaction.category?.name}
                     </div>
                   </td>
-                  <td className="relative py-4 pl-3 text-right text-sm font-medium">
+                  <td className="relative hidden py-4 pl-3 text-right text-sm font-medium sm:table-cell">
                     <Link
                       to={`/dashboard/Transaction/${transaction.id}`}
                       className="pr-2 text-indigo-600 hover:text-indigo-900"

@@ -23,6 +23,7 @@ export function getTransactionListItems() {
       description: true,
       amount: true,
       date: true,
+      panini: true,
       user: {
         select: {
           id: true,
@@ -47,13 +48,15 @@ export function createTransaction({
   date,
   userId,
   categoryId,
-}: Pick<Transaction, "description" | "amount" | "date" | "userId" | "categoryId">) {
+  panini,
+}: Pick<Transaction, "description" | "amount" | "date" | "userId" | "categoryId" | "panini">) {
   let data = {
     description,
     amount,
     date,
     userId,
     categoryId,
+    panini,
   };
 
   return prisma.transaction.create({
@@ -68,13 +71,15 @@ export function updateTransaction({
   date,
   userId,
   categoryId,
-}: Pick<Transaction, "id" | "description" | "amount" | "date" | "userId" | "categoryId">) {
+  panini,
+}: Pick<Transaction, "id" | "description" | "amount" | "date" | "userId" | "categoryId" | "panini">) {
   let data = {
     description,
     amount,
     date,
     userId,
     categoryId,
+    panini
   };
 
   return prisma.transaction.updateMany({
@@ -93,7 +98,7 @@ export function deleteTransaction({
 
 export async function getUserTransactionBalance(id: string){
   const sum = await prisma.transaction.aggregate({
-    where: { userId: id },
+    where: { userId: id, panini: false },
     _sum: { amount: true },
   });
 
@@ -102,6 +107,7 @@ export async function getUserTransactionBalance(id: string){
 
 export async function getTotalSpent(){
   const sum = await prisma.transaction.aggregate({
+    where: { panini: false },
     _sum: { amount: true },
   });
 
