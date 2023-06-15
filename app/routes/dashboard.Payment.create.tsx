@@ -8,7 +8,9 @@ import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
 import { getUserListItems } from "~/models/dashboard/User.server";
 import { useState } from "react";
 import Dinero from "dinero.js";
-import { extractAmount, getUserBalance } from "~/utils";
+import type { UserErrorType } from "~/utils";
+import { classNames, extractAmount, getUserBalance } from "~/utils";
+import { Switch } from "@headlessui/react";
 
 function getClassName(error: boolean) {
   const errorClasses =
@@ -24,13 +26,19 @@ function getClassName(error: boolean) {
 export async function action({ request }: ActionArgs) {
   const userId = await requireUserId(request);
   const formData = await request.formData();
-  const { description, amount, receiverId } = Object.fromEntries(formData);
+  const { description, amount, receiverId, panini } =
+    Object.fromEntries(formData);
+  const isPanini = panini === "true";
 
-  const errors = {
+  const errors: UserErrorType = {
     description: description ? null : "Description is required",
     amount: amount ? null : "Amount is required",
-    receiverId: receiverId ? null : "Receiver is required",
+    receiverId: null,
   };
+  if (!isPanini) {
+    errors.receiverId = receiverId ? null : "Receiver is required";
+  }
+
   const hasErrors = Object.values(errors).some((errorMessage) => errorMessage);
   if (hasErrors) {
     return json(errors);
@@ -39,13 +47,14 @@ export async function action({ request }: ActionArgs) {
   invariant(typeof description === "string", "Invalid description");
   invariant(typeof amount === "string", "Invalid amount");
   invariant(typeof userId === "string", "Invalid senderId");
-  invariant(typeof receiverId === "string", "Invalid receiverId");
+  invariant(typeof receiverId === "string" || isPanini, "Invalid receiverId");
 
   await createPayment({
     description,
     amount: extractAmount(amount),
     senderId: userId,
-    receiverId,
+    receiverId: receiverId as string,
+    panini: isPanini,
   });
 
   return redirect(`/dashboard/Payment`);
@@ -65,6 +74,7 @@ export async function loader({ request }: LoaderArgs) {
 export default function CreatePayment() {
   const { receivers, userBalance } = useLoaderData<typeof loader>();
   const errors = useActionData<typeof action>();
+  const [isPanini, setIsPanini] = useState(false);
 
   const defaultAmount = Dinero({ amount: userBalance.balance })
     .toFormat("0,0.00")
@@ -89,7 +99,7 @@ export default function CreatePayment() {
       <h1 className="text-xl font-semibold text-gray-900">Pagos</h1>
       <div className="border-b border-gray-100 px-4 py-6 sm:col-span-1 sm:px-0">
         <p className="text-sm font-medium leading-6 text-gray-900">
-          Hola, {userBalance.status.text}
+          Hola, {userBalance.status.text}:
         </p>
         <p
           className={
@@ -97,6 +107,20 @@ export default function CreatePayment() {
           }
         >
           {Dinero({ amount: userBalance.balance })
+            .toFormat("$0,0.00")
+            .replace("-", "")}
+        </p>
+      </div>
+      <div className="border-b border-gray-100 px-4 py-6 sm:col-span-1 sm:px-0">
+        <p className="text-sm font-medium leading-6 text-gray-900">
+          Panini House, {userBalance.paniniStatus.text}:
+        </p>
+        <p
+          className={
+            "mt-1 text-sm leading-6  sm:mt-2 " + userBalance.paniniStatus.color
+          }
+        >
+          {Dinero({ amount: userBalance.paniniBalance })
             .toFormat("$0,0.00")
             .replace("-", "")}
         </p>
@@ -191,15 +215,16 @@ export default function CreatePayment() {
                 <select
                   id="receiverId"
                   name="receiverId"
+                  disabled={isPanini}
                   defaultValue={receivers[0].id}
                   className={getClassName(Boolean(errors?.receiverId))}
                 >
                   <option value="" disabled>
-                    Select receiver
+                    Seleccionar destinatario
                   </option>
                   {receivers.map((option) => (
                     <option key={option.id} value={option.id}>
-                      {option.email}
+                      {isPanini ? "Tú" : option.email}
                     </option>
                   ))}
                 </select>
@@ -217,6 +242,79 @@ export default function CreatePayment() {
                   {errors?.receiverId}
                 </p>
               ) : null}
+            </div>
+            <div className="sm:col-span-3">
+              <label
+                htmlFor="panini"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Panini House
+              </label>
+              <input
+                type="hidden"
+                name="panini"
+                id="panini"
+                value={`${isPanini}`}
+              />
+              <div className="relative mt-2">
+                <Switch
+                  checked={isPanini}
+                  onChange={() => setIsPanini(!isPanini)}
+                  className={classNames(
+                    isPanini ? "bg-indigo-600" : "bg-gray-200",
+                    "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  )}
+                >
+                  <span className="sr-only">Panini House</span>
+                  <span
+                    className={classNames(
+                      isPanini ? "translate-x-5" : "translate-x-0",
+                      "pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                    )}
+                  >
+                    <span
+                      className={classNames(
+                        isPanini
+                          ? "opacity-0 duration-100 ease-out"
+                          : "opacity-100 duration-200 ease-in",
+                        "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
+                      )}
+                      aria-hidden="true"
+                    >
+                      <svg
+                        className="h-3 w-3 text-gray-400"
+                        fill="none"
+                        viewBox="0 0 12 12"
+                      >
+                        <path
+                          d="M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    <span
+                      className={classNames(
+                        isPanini
+                          ? "opacity-100 duration-200 ease-in"
+                          : "opacity-0 duration-100 ease-out",
+                        "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
+                      )}
+                      aria-hidden="true"
+                    >
+                      <svg
+                        className="text-blue-1 h-3 w-3"
+                        fill="currentColor"
+                        viewBox="0 0 12 12"
+                      >
+                        <path d="M3.707 5.293a1 1 0 00-1.414 1.414l1.414-1.414zM5 8l-.707.707a1 1 0 001.414 0L5 8zm4.707-3.293a1 1 0 00-1.414-1.414l1.414 1.414zm-7.414 2l2 2 1.414-1.414-2-2-1.414 1.414zm3.414 2l4-4-1.414-1.414-4 4 1.414 1.414z" />
+                      </svg>
+                    </span>
+                  </span>
+                </Switch>
+              </div>
             </div>
           </div>
         </div>

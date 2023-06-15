@@ -14,9 +14,11 @@ import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
-import type { LoaderArgs } from "@remix-run/node";
+import type { LoaderArgs, V2_MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { getUser, getUserId } from "~/session.server";
+
+export const meta: V2_MetaFunction = () => [{ title: "Dashboard" }];
 
 const navigation = [
   { name: "Balance", href: "/dashboard", icon: HomeIcon, current: true },

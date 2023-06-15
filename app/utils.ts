@@ -2,8 +2,8 @@ import { useMatches } from "@remix-run/react";
 import { useMemo } from "react";
 
 import type { User } from "~/models/user.server";
-import { getTotalSpent, getUserTransactionBalance } from './models/dashboard/Transaction.server';
-import { getUserPaymentBalance } from './models/dashboard/Payment.server';
+import { getTotalSpent, getUserSpentOnPanini, getUserTotalSpent } from './models/dashboard/Transaction.server';
+import { getPaniniTotalPaymentToUser, getUserPaymentBalance } from './models/dashboard/Payment.server';
 import Dinero from 'dinero.js';
 
 const DEFAULT_REDIRECT = "/";
@@ -95,9 +95,12 @@ export function extractAmount(amount: string) {
 
 
 export async function getUserBalance(userId: string) {
-  const transactions = await getUserTransactionBalance(userId);
+  const transactions = await getUserTotalSpent(userId);
   const payments = await getUserPaymentBalance(userId);
   const totalSpent = await getTotalSpent();
+  const spentOnPanini = await getUserSpentOnPanini(userId);
+  const paniniPaymentsToUser = await getPaniniTotalPaymentToUser(userId);
+  console.log({spentOnPanini,paniniPaymentsToUser})
 
   const totalPerUser = Dinero({
     amount: totalSpent,
@@ -111,12 +114,9 @@ export async function getUserBalance(userId: string) {
     .add(paymentsBalance)
     .subtract(totalPerUser);
 
-  console.log({
-    totalPerUser: totalPerUser.getAmount(),
-    transactions,
-    paymentsBalance: paymentsBalance.getAmount(),
-    userBalance: userBalance.getAmount(),
-  });
+  const paniniBalance = Dinero({ amount: spentOnPanini }).subtract(
+    Dinero({ amount: paniniPaymentsToUser })
+  );
 
   const status = (balance: number) => {
     if (balance > 0) {
@@ -129,14 +129,18 @@ export async function getUserBalance(userId: string) {
   };
 
   return {
-    totalPerUser: totalPerUser.getAmount(),
-    transactions,
-    paymentsBalance: paymentsBalance.getAmount(),
     balance: userBalance.getAmount(),
+    paniniBalance: paniniBalance.getAmount(),
     status: status(userBalance.getAmount()),
+    paniniStatus: status(paniniBalance.getAmount()),
   };
 }
 
 export function generateFormRandomId() {
   return Math.random().toString(36).substring(2, 15);
 }
+
+export interface UserErrorType {
+  [key: string]: string | null;
+}
+

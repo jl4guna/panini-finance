@@ -6,17 +6,22 @@ import { getUserBalance } from "~/utils";
 
 export async function loader({ request }: LoaderArgs) {
   const user = await requireUser(request);
-  const { balance, status } = await getUserBalance(user.id);
+  const { balance, paniniBalance, status, paniniStatus } = await getUserBalance(
+    user.id
+  );
 
   return {
     balance,
+    paniniBalance,
     user,
     status,
+    paniniStatus,
   };
 }
 
 export default function Dashboard() {
-  const { balance, status, user } = useLoaderData<typeof loader>();
+  const { balance, status, user, paniniBalance, paniniStatus } =
+    useLoaderData<typeof loader>();
 
   return (
     <div>
@@ -68,6 +73,26 @@ export default function Dashboard() {
             </dd>
           </div>
         </dl> */}
+      </section>
+      <section
+        aria-labelledby="summary-heading"
+        className="mt-16 rounded-lg bg-gray-50 px-4 py-6 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8"
+      >
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+          Panini House, {paniniStatus.text}:
+        </h1>
+
+        <div className="mt-3">
+          <p
+            className={
+              "text-3xl tracking-tight text-gray-900 " + paniniStatus.color
+            }
+          >
+            {Dinero({ amount: paniniBalance })
+              .toFormat("$0,0.00")
+              .replace("-", "")}
+          </p>
+        </div>
       </section>
     </div>
   );

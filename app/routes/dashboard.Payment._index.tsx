@@ -93,6 +93,12 @@ export default function Payment() {
                   scope="col"
                   className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
                 >
+                  Panini House
+                </th>
+                <th
+                  scope="col"
+                  className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+                >
                   Fecha
                 </th>
                 <th scope="col" className="relative py-3.5 pl-3">
@@ -116,6 +122,9 @@ export default function Payment() {
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
                     {payment.receiver?.email}
+                  </td>
+                  <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                    {payment.panini ? "Si" : "No"}
                   </td>
                   <td className="px-3 py-4 text-sm text-gray-500">
                     {formatDate(payment.createdAt)}

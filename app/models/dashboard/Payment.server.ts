@@ -32,6 +32,7 @@ export function getPaymentListItems() {
           email: true,
       }},
       createdAt: true,
+      panini: true,
     },
   });
 }
@@ -41,13 +42,17 @@ export function createPayment({
   amount,
   senderId,
   receiverId,
-}: Pick<Payment, "description" | "amount" | "senderId" | "receiverId">) {
+  panini = false,
+}: Pick<Payment, "description" | "amount" | "senderId" | "receiverId" | "panini">) {
   let data = {
     description,
     amount,
     senderId,
     receiverId,
+    panini,
   };
+
+  if(panini) data.receiverId = senderId;
 
   return prisma.payment.create({
     data: data,
@@ -60,13 +65,17 @@ export function updatePayment({
   amount,
   senderId,
   receiverId,
-}: Pick<Payment, "id" | "description" | "amount" | "senderId" | "receiverId">) {
+  panini,
+}: Pick<Payment, "id" | "description" | "amount" | "senderId" | "receiverId" | "panini">) {
   let data = {
     description,
     amount,
     senderId,
     receiverId,
+    panini,
   };
+
+  if(panini) data.receiverId = senderId;
 
   return prisma.payment.updateMany({
     where: { id },
@@ -97,4 +106,13 @@ export async function getUserPaymentBalance(id: string){
     sent: sent._sum.amount || 0,
     received: received._sum.amount || 0,
   }
+}
+
+export async function getPaniniTotalPaymentToUser(id: string){
+  const sent = await prisma.payment.aggregate({
+    where: { senderId: id, panini: true },
+    _sum: { amount: true },
+  });
+  
+  return sent._sum.amount || 0;
 }

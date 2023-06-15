@@ -96,7 +96,7 @@ export function deleteTransaction({
   });
 }
 
-export async function getUserTransactionBalance(id: string){
+export async function getUserTotalSpent(id: string){
   const sum = await prisma.transaction.aggregate({
     where: { userId: id, panini: false },
     _sum: { amount: true },
@@ -108,6 +108,24 @@ export async function getUserTransactionBalance(id: string){
 export async function getTotalSpent(){
   const sum = await prisma.transaction.aggregate({
     where: { panini: false },
+    _sum: { amount: true },
+  });
+
+  return sum._sum.amount || 0;
+}
+
+export async function getUserSpentOnPanini(id: string){
+  const sum = await prisma.transaction.aggregate({
+    where: { userId: id, panini: true },
+    _sum: { amount: true },
+  });
+
+  return sum._sum.amount || 0;
+}
+
+export async function getPaniniTotalSpent(){
+  const sum = await prisma.transaction.aggregate({
+    where: { panini: true },
     _sum: { amount: true },
   });
 
