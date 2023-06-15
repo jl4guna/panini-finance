@@ -1,4 +1,4 @@
-import { Form, Outlet, useLoaderData } from "@remix-run/react";
+import { Form, NavLink, Outlet, useLoaderData } from "@remix-run/react";
 
 import { Fragment, useState } from "react";
 import { Dialog, Menu, Transition } from "@headlessui/react";
@@ -21,7 +21,7 @@ import { getUser, getUserId } from "~/session.server";
 export const meta: V2_MetaFunction = () => [{ title: "Dashboard" }];
 
 const navigation = [
-  { name: "Balance", href: "/dashboard", icon: HomeIcon, current: true },
+  { name: "Balance", href: "/dashboard", icon: HomeIcon, current: false },
   {
     name: "Categorías",
     href: "/dashboard/Category",
@@ -131,26 +131,26 @@ export default function Dashboard() {
                           <ul className="-mx-2 space-y-1">
                             {navigation.map((item) => (
                               <li key={item.name}>
-                                <a
-                                  href={item.href}
-                                  className={classNames(
-                                    item.current
-                                      ? "bg-gray-50 text-indigo-600"
-                                      : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
-                                    "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6"
-                                  )}
+                                <NavLink
+                                  end
+                                  to={item.href}
+                                  className={({ isActive, isPending }) =>
+                                    classNames(
+                                      isPending
+                                        ? "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+                                        : isActive
+                                        ? "bg-gray-50 text-indigo-600"
+                                        : "",
+                                      "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6"
+                                    )
+                                  }
                                 >
                                   <item.icon
-                                    className={classNames(
-                                      item.current
-                                        ? "text-indigo-600"
-                                        : "text-gray-400 group-hover:text-indigo-600",
-                                      "h-6 w-6 shrink-0"
-                                    )}
+                                    className="h-6 w-6 shrink-0"
                                     aria-hidden="true"
                                   />
                                   {item.name}
-                                </a>
+                                </NavLink>
                               </li>
                             ))}
                           </ul>
@@ -191,26 +191,26 @@ export default function Dashboard() {
                   <ul className="-mx-2 space-y-1">
                     {navigation.map((item) => (
                       <li key={item.name}>
-                        <a
-                          href={item.href}
-                          className={classNames(
-                            item.current
-                              ? "bg-gray-50 text-indigo-600"
-                              : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
-                            "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6"
-                          )}
+                        <NavLink
+                          to={item.href}
+                          end
+                          className={({ isActive, isPending }) =>
+                            classNames(
+                              isPending
+                                ? "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+                                : isActive
+                                ? "bg-gray-50 text-indigo-600"
+                                : "",
+                              "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6"
+                            )
+                          }
                         >
                           <item.icon
-                            className={classNames(
-                              item.current
-                                ? "text-indigo-600"
-                                : "text-gray-400 group-hover:text-indigo-600",
-                              "h-6 w-6 shrink-0"
-                            )}
+                            className="h-6 w-6 shrink-0"
                             aria-hidden="true"
                           />
                           {item.name}
-                        </a>
+                        </NavLink>
                       </li>
                     ))}
                   </ul>
