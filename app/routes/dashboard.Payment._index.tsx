@@ -5,7 +5,7 @@ import {
   deletePayment,
   getPaymentListItems,
 } from "~/models/dashboard/Payment.server";
-import { formatDate } from "~/utils";
+import { formatDateToDisplay } from "~/utils";
 import Dinero from "dinero.js";
 import type { Alert } from "~/components/ConfirmAlert";
 import ConfirmAlert from "~/components/ConfirmAlert";
@@ -127,7 +127,7 @@ export default function Payment() {
                     {payment.panini ? "Si" : "No"}
                   </td>
                   <td className="px-3 py-4 text-sm text-gray-500">
-                    {formatDate(payment.createdAt)}
+                    {formatDateToDisplay(payment.createdAt)}
                   </td>
                   {currentUserId === payment?.sender.id ? (
                     <td className="relative py-4 pl-3 text-right text-sm font-medium">

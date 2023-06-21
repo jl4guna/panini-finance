@@ -84,6 +84,13 @@ export function formatDate(date: string = "") {
   )}-${addMissingDigit(formattedDate.getUTCDate())}`;
 }
 
+export function formatDateToDisplay(date: string = "") {
+  const formattedDate = new Date(date);
+  return `${addMissingDigit(formattedDate.getUTCDate())}/${addMissingDigit(
+    formattedDate.getUTCMonth() + 1
+  )}/${formattedDate.getUTCFullYear()}`;
+}
+
 export function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
 }

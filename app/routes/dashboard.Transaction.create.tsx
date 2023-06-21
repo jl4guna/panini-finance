@@ -109,6 +109,7 @@ export default function CreateTransaction() {
 
   useEffect(() => {
     setAmount("");
+    setIsPanini(false);
   }, [formRandomId]);
 
   return (

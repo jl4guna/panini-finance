@@ -5,7 +5,7 @@ import {
   deleteTransaction,
   getTransactionListItems,
 } from "~/models/dashboard/Transaction.server";
-import { formatDate } from "~/utils";
+import { formatDateToDisplay } from "~/utils";
 import Dinero from "dinero.js";
 import Icon from "~/components/Icon";
 import type { Alert } from "~/components/ConfirmAlert";
@@ -95,7 +95,7 @@ export default function Transaction() {
                 </th>
                 <th
                   scope="col"
-                  className="hidden px-3 py-3.5 text-center text-sm font-semibold text-gray-900 sm:table-cell"
+                  className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
                 >
                   Categoría
                 </th>
@@ -119,7 +119,7 @@ export default function Transaction() {
                     {Dinero({ amount: transaction.amount }).toFormat("$0,0.00")}
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    {formatDate(transaction.date)}
+                    {formatDateToDisplay(transaction.date)}
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
                     {transaction.user?.email}
@@ -128,7 +128,7 @@ export default function Transaction() {
                     {transaction.panini ? "Si" : "No"}
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    <div className="flex items-center justify-center gap-2">
+                    <div className="flex items-center justify-start gap-2">
                       <Icon
                         name={transaction.category.icon || ""}
                         color={transaction.category.color}
