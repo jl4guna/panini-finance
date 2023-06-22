@@ -131,3 +131,13 @@ export async function getPaniniTotalSpent(){
 
   return sum._sum.amount || 0;
 }
+
+export async function getPaniniTotalSpentByCategory(startDate: Date, endDate: Date){
+  const sum = await prisma.transaction.groupBy({
+    by: ["categoryId"],
+    where: { panini: true, date: { gte: startDate, lte: endDate } },
+    _sum: { amount: true },
+  });
+
+  return sum;
+}

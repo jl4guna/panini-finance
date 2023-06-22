@@ -3,11 +3,22 @@ import type { LoaderArgs } from "@remix-run/node";
 import { requireUser } from "~/session.server";
 import { useLoaderData } from "@remix-run/react";
 import { getUserBalance } from "~/utils";
+import { getPaniniTotalSpentByCategory } from "~/models/dashboard/Transaction.server";
+import { getCategoryListItems } from "~/models/dashboard/Category.server";
 
 export async function loader({ request }: LoaderArgs) {
   const user = await requireUser(request);
   const { balance, paniniBalance, status, paniniStatus } = await getUserBalance(
     user.id
+  );
+
+  const categories = await getCategoryListItems();
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - 30);
+  const endDate = new Date();
+  const spentByCategory = await getPaniniTotalSpentByCategory(
+    startDate,
+    endDate
   );
 
   return {
@@ -16,12 +27,21 @@ export async function loader({ request }: LoaderArgs) {
     user,
     status,
     paniniStatus,
+    spentByCategory,
+    categories,
   };
 }
 
 export default function Dashboard() {
-  const { balance, status, user, paniniBalance, paniniStatus } =
-    useLoaderData<typeof loader>();
+  const {
+    balance,
+    status,
+    user,
+    paniniBalance,
+    paniniStatus,
+    spentByCategory,
+    categories,
+  } = useLoaderData<typeof loader>();
 
   return (
     <div>
@@ -40,39 +60,6 @@ export default function Dashboard() {
             {Dinero({ amount: balance }).toFormat("$0,0.00").replace("-", "")}
           </p>
         </div>
-        {/* <h2
-          id="summary-heading"
-          className="text-center text-lg font-medium text-gray-900"
-        >
-          Your Balance
-        </h2>
-
-        <dl className="mt-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <dt className="text-sm text-gray-600">Everyone should pay</dt>
-            <dd className="text-sm font-medium text-gray-900">
-              {Dinero({ amount: totalPerUser }).toFormat("$0,0.00")}
-            </dd>
-          </div>
-          <div className="flex items-center justify-between">
-            <dt className="text-sm text-gray-600">You payed for</dt>
-            <dd className="text-sm font-medium text-gray-900">
-              {Dinero({ amount: transactions }).toFormat("$0,0.00")}
-            </dd>
-          </div>
-          <div className="flex items-center justify-between">
-            <dt className="text-sm text-gray-600">You sent</dt>
-            <dd className="text-sm font-medium text-gray-900">
-              {Dinero({ amount: paymentsBalance }).toFormat("$0,0.00")}
-            </dd>
-          </div>
-          <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-            <dt className="text-base font-medium text-gray-900">Balance</dt>
-            <dd className="text-base font-medium text-gray-900">
-              {Dinero({ amount: userBalance }).toFormat("$0,0.00")}
-            </dd>
-          </div>
-        </dl> */}
       </section>
       <section
         aria-labelledby="summary-heading"
@@ -93,6 +80,28 @@ export default function Dashboard() {
               .replace("-", "")}
           </p>
         </div>
+        <h2
+          id="summary-heading"
+          className="text-center text-lg font-medium text-gray-900"
+        >
+          Gastos por categoría este mes
+        </h2>
+
+        {categories.map((category) => {
+          const total =
+            spentByCategory.find((spent) => spent.categoryId === category.id)
+              ?._sum.amount || 0;
+          return (
+            <dl key={category.id} className="mt-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <dt className="text-sm text-gray-600">{category.name}</dt>
+                <dd className="text-sm font-medium text-gray-900">
+                  {Dinero({ amount: total }).toFormat("$0,0.00")}
+                </dd>
+              </div>
+            </dl>
+          );
+        })}
       </section>
     </div>
   );
