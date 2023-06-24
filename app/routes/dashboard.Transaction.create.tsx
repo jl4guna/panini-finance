@@ -9,9 +9,9 @@ import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
 import { getUserListItems } from "~/models/dashboard/User.server";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
 import {
-  addMissingDigit,
   classNames,
   extractAmount,
+  formatDate,
   generateFormRandomId,
 } from "~/utils";
 import { useEffect, useState } from "react";
@@ -89,11 +89,6 @@ export default function CreateTransaction() {
     useLoaderData<typeof loader>();
   const errors = useActionData<typeof action>();
   const [isPanini, setIsPanini] = useState(false);
-
-  const birthDate = new Date();
-  const formattedDate = `${birthDate.getUTCFullYear()}-${addMissingDigit(
-    birthDate.getUTCMonth() + 1
-  )}-${addMissingDigit(birthDate.getUTCDate())}`;
 
   const [amount, setAmount] = useState("");
 
@@ -206,7 +201,7 @@ export default function CreateTransaction() {
                   type="date"
                   id="date"
                   name="date"
-                  defaultValue={formattedDate}
+                  defaultValue={formatDate()}
                   className={getClassName(Boolean(errors?.date))}
                   required={true}
                 />

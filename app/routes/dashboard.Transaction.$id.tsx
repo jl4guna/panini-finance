@@ -11,7 +11,12 @@ import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
 import Dinero from "dinero.js";
 import { getUserListItems } from "~/models/dashboard/User.server";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
-import { addMissingDigit, classNames, extractAmount } from "~/utils";
+import {
+  addMissingDigit,
+  classNames,
+  extractAmount,
+  formatDate,
+} from "~/utils";
 import { useState } from "react";
 import { Switch } from "@headlessui/react";
 
@@ -80,11 +85,6 @@ export default function UpdateTransaction() {
   const { transaction, users, categories } = useLoaderData<typeof loader>();
   const errors = useActionData<typeof action>();
   const [isPanini, setIsPanini] = useState(transaction?.panini);
-
-  const birthDate = new Date(transaction?.date || "");
-  const formattedDate = `${birthDate.getUTCFullYear()}-${addMissingDigit(
-    birthDate.getUTCMonth() + 1
-  )}-${addMissingDigit(birthDate.getUTCDate())}`;
 
   const initialAmount = Dinero({
     amount: transaction?.amount || 0,
@@ -193,7 +193,7 @@ export default function UpdateTransaction() {
                   type="date"
                   id="date"
                   name="date"
-                  defaultValue={formattedDate}
+                  defaultValue={formatDate(transaction?.date || "")}
                   className={getClassName(Boolean(errors?.date))}
                   required={true}
                 />

@@ -77,7 +77,7 @@ export function addMissingDigit(digit: number) {
   return digit < 10 ? `0${digit}` : digit;
 }
 
-export function formatDate(date: string = "") {
+export function formatDate(date: string | Date = new Date()) {
   const formattedDate = new Date(date);
   return `${formattedDate.getUTCFullYear()}-${addMissingDigit(
     formattedDate.getUTCMonth() + 1
@@ -107,7 +107,6 @@ export async function getUserBalance(userId: string) {
   const totalSpent = await getTotalSpent();
   const spentOnPanini = await getUserSpentOnPanini(userId);
   const paniniPaymentsToUser = await getPaniniTotalPaymentToUser(userId);
-  console.log({spentOnPanini,paniniPaymentsToUser})
 
   const totalPerUser = Dinero({
     amount: totalSpent,
