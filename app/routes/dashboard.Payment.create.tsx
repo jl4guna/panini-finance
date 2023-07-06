@@ -26,7 +26,7 @@ function getClassName(error: boolean) {
 export async function action({ request }: ActionArgs) {
   const userId = await requireUserId(request);
   const formData = await request.formData();
-  const { description, amount, receiverId, panini } =
+  const { description, amount, receiverId, panini, notes } =
     Object.fromEntries(formData);
   const isPanini = panini === "true";
 
@@ -48,6 +48,7 @@ export async function action({ request }: ActionArgs) {
   invariant(typeof amount === "string", "Invalid amount");
   invariant(typeof userId === "string", "Invalid senderId");
   invariant(typeof receiverId === "string" || isPanini, "Invalid receiverId");
+  invariant(typeof notes === "string", "Invalid notes");
 
   await createPayment({
     description,
@@ -55,6 +56,7 @@ export async function action({ request }: ActionArgs) {
     senderId: userId,
     receiverId: receiverId as string,
     panini: isPanini,
+    notes,
   });
 
   return redirect(`/dashboard/Payment`);
@@ -314,6 +316,23 @@ export default function CreatePayment() {
                     </span>
                   </span>
                 </Switch>
+              </div>
+            </div>
+            <div className="sm:col-span-6">
+              <label
+                htmlFor="notes"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Notas:
+              </label>
+              <div className="mt-2">
+                <textarea
+                  rows={4}
+                  name="notes"
+                  id="notes"
+                  className="block w-full rounded-md border-0 p-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  defaultValue={""}
+                />
               </div>
             </div>
           </div>

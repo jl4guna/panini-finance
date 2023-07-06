@@ -49,7 +49,8 @@ export function createTransaction({
   userId,
   categoryId,
   panini,
-}: Pick<Transaction, "description" | "amount" | "date" | "userId" | "categoryId" | "panini">) {
+  notes,
+}: Pick<Transaction, "description" | "amount" | "date" | "userId" | "categoryId" | "panini" | "notes">) {
   let data = {
     description,
     amount,
@@ -57,6 +58,7 @@ export function createTransaction({
     userId,
     categoryId,
     panini,
+    notes
   };
 
   return prisma.transaction.create({
@@ -72,14 +74,16 @@ export function updateTransaction({
   userId,
   categoryId,
   panini,
-}: Pick<Transaction, "id" | "description" | "amount" | "date" | "userId" | "categoryId" | "panini">) {
+  notes
+}: Pick<Transaction, "id" | "description" | "amount" | "date" | "userId" | "categoryId" | "panini" | "notes">) {
   let data = {
     description,
     amount,
     date,
     userId,
     categoryId,
-    panini
+    panini,
+    notes
   };
 
   return prisma.transaction.updateMany({

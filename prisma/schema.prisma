@@ -58,6 +58,7 @@ model Transaction {
   amount      Float
   date        DateTime
   panini      Boolean  @default(false)
+  notes       String   @default("")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -76,6 +77,7 @@ model Payment {
   senderId    String
   receiverId  String
   panini      Boolean @default(false)
+  notes       String  @default("")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

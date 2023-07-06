@@ -43,13 +43,15 @@ export function createPayment({
   senderId,
   receiverId,
   panini = false,
-}: Pick<Payment, "description" | "amount" | "senderId" | "receiverId" | "panini">) {
+  notes
+}: Pick<Payment, "description" | "amount" | "senderId" | "receiverId" | "panini" | "notes">) {
   let data = {
     description,
     amount,
     senderId,
     receiverId,
     panini,
+    notes
   };
 
   if(panini) data.receiverId = senderId;
@@ -66,13 +68,15 @@ export function updatePayment({
   senderId,
   receiverId,
   panini,
-}: Pick<Payment, "id" | "description" | "amount" | "senderId" | "receiverId" | "panini">) {
+  notes,
+}: Pick<Payment, "id" | "description" | "amount" | "senderId" | "receiverId" | "panini" | "notes">) {
   let data = {
     description,
     amount,
     senderId,
     receiverId,
     panini,
+    notes
   };
 
   if(panini) data.receiverId = senderId;
