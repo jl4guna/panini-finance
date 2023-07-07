@@ -76,7 +76,6 @@ export async function loader({ params }: LoaderArgs) {
   const transaction = await getTransaction({ id });
   const users = await getUserListItems();
   const categories = await getCategoryListItems();
-  console.log(transaction);
   return {
     transaction,
     users,

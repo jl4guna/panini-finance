@@ -12,11 +12,16 @@ export function getTransaction({
   });
 }
 
-export function getTransactionListItems() {
+export function getTransactionListItems(filter?: string) {
 
   return prisma.transaction.findMany({
     orderBy: {
       date: "desc",
+    },
+    where: {
+      category: {
+        name: filter,
+      },
     },
     select: {
       id: true,
