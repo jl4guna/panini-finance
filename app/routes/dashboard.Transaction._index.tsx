@@ -65,7 +65,7 @@ export default function Transaction() {
           </Link>
         </div>
       </div>
-      <div key={generateFormRandomId()} className="mt-4 w-1/3">
+      <div key={generateFormRandomId()} className="mt-4 w-full md:w-1/3">
         <Listbox value={category}>
           {({ open }) => (
             <>
@@ -223,9 +223,11 @@ export default function Transaction() {
               {transactions.map((transaction) => (
                 <tr key={transaction.id}>
                   <td className="relative py-4 pr-3 text-sm font-medium text-gray-900">
-                    {transaction.description}
-                    <div className="absolute bottom-0 right-full h-px w-screen bg-gray-100" />
-                    <div className="absolute bottom-0 left-0 h-px w-screen bg-gray-100" />
+                    <Link to={`/dashboard/Transaction/${transaction.id}`}>
+                      {transaction.description}
+                      <div className="absolute bottom-0 right-full h-px w-screen bg-gray-100" />
+                      <div className="absolute bottom-0 left-0 h-px w-screen bg-gray-100" />
+                    </Link>
                   </td>
                   <td className="px-3 py-4 text-sm text-gray-500 sm:table-cell">
                     {Dinero({ amount: transaction.amount }).toFormat("$0,0.00")}

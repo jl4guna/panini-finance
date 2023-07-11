@@ -43,8 +43,6 @@ export async function action({ request }: ActionArgs) {
     notes,
   } = Object.fromEntries(formData);
 
-  console.log({ notes });
-
   const errors = {
     description: description ? null : "Description is required",
     amount: amount ? null : "Amount is required",
