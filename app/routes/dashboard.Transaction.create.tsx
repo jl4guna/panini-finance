@@ -30,7 +30,7 @@ function getClassName(error: boolean) {
 }
 
 export async function action({ request }: ActionArgs) {
-  const user = await requireUserId(request);
+  await requireUserId(request);
   const formData = await request.formData();
   const {
     description,

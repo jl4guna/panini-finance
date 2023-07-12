@@ -12,7 +12,6 @@ import Dinero from "dinero.js";
 import { getUserListItems } from "~/models/dashboard/User.server";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
 import {
-  addMissingDigit,
   classNames,
   extractAmount,
   formatDate,
@@ -33,7 +32,7 @@ function getClassName(error: boolean) {
 
 export async function action({ request, params }: ActionArgs) {
   const id = params.id as string;
-  const user = await requireUserId(request);
+  await requireUserId(request);
   const formData = await request.formData();
   const { description, amount, date, userId, categoryId, panini, notes } =
     Object.fromEntries(formData);

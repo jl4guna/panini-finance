@@ -7,8 +7,7 @@ import type { Alert } from "~/components/ConfirmAlert";
 import ConfirmAlert from "~/components/ConfirmAlert";
 import Icon from "~/components/Icon";
 import type { Category as CategoryType } from "~/models/dashboard/Category.server";
-import { deleteCategory } from "~/models/dashboard/Category.server";
-import { getCategoryListItems } from "~/models/dashboard/Category.server";
+import { deleteCategory,getCategoryListItems } from "~/models/dashboard/Category.server";
 import { requireUserId } from "~/session.server";
 
 export async function action({ request }: ActionArgs) {

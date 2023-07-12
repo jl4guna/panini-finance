@@ -1,4 +1,4 @@
-import { Link, useActionData, Form, useLoaderData } from "@remix-run/react";
+import { Link, useActionData, Form } from "@remix-run/react";
 import type { ActionArgs } from "@remix-run/server-runtime";
 import { redirect, json } from "@remix-run/server-runtime";
 import invariant from "tiny-invariant";
@@ -19,7 +19,7 @@ function getClassName(error: boolean) {
 }
 
 export async function action({ request }: ActionArgs) {
-  const user = await requireUserId(request);
+  await requireUserId(request);
   const formData = await request.formData();
   const { name, color, icon } = Object.fromEntries(formData);
 
@@ -45,12 +45,7 @@ export async function action({ request }: ActionArgs) {
   return redirect(`/dashboard/Category`);
 }
 
-export async function loader() {
-  return {};
-}
-
 export default function CreateCategory() {
-  const {} = useLoaderData<typeof loader>();
   const errors = useActionData<typeof action>();
 
   return (

@@ -19,7 +19,7 @@ function getClassName(error: boolean) {
 
 export async function action({ request, params }: ActionArgs) {
   const id = params.id as string;
-  const user = await requireUserId(request);
+  await requireUserId(request);
   const formData = await request.formData();
   const { email, name } = Object.fromEntries(formData);
 
