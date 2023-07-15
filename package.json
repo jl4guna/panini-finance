@@ -17,7 +17,6 @@
     "typecheck": "tsc",
     "validate": "run-p \"test -- --run\" lint typecheck test:e2e:run",
     "build:remix": "cross-env NODE_ENV=production remix build",
-    "build:worker": "esbuild ./app/entry.worker.ts --outfile=./public/entry.worker.js --minify --bundle --platform=node --format=esm --define:process.env.NODE_ENV='\"production\"'",
     "dev:remix": "cross-env NODE_ENV=development remix dev"
   },
   "prettier": {},
