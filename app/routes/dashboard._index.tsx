@@ -7,6 +7,9 @@ import { getPaniniTotalSpentByCategory } from "~/models/dashboard/Transaction.se
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import UpcomingEvents from "~/components/UpcomingEvents";
+import type { Reminder } from "~/models/dashboard/Reminder.server";
+import { getUpcomingReminders } from "~/models/dashboard/Reminder.server";
 
 export async function loader({ request, params }: LoaderArgs) {
   const user = await requireUser(request);
@@ -14,7 +17,7 @@ export async function loader({ request, params }: LoaderArgs) {
   const { start, end } = Object.fromEntries(searchParams.entries());
 
   const { balance, paniniBalance, status, paniniStatus } = await getUserBalance(
-    user.id
+    user.id,
   );
 
   const categories = await getCategoryListItems();
@@ -26,8 +29,10 @@ export async function loader({ request, params }: LoaderArgs) {
   const endDate = end ? new Date(end) : new Date();
   const spentByCategory = await getPaniniTotalSpentByCategory(
     startDate,
-    endDate
+    endDate,
   );
+
+  const reminders = await getUpcomingReminders();
 
   return {
     balance,
@@ -41,6 +46,7 @@ export async function loader({ request, params }: LoaderArgs) {
       startDate: formatDate(startDate),
       endDate: formatDate(endDate),
     },
+    reminders,
   };
 }
 
@@ -54,6 +60,7 @@ export default function Dashboard() {
     spentByCategory,
     categories,
     range,
+    reminders,
   } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
 
@@ -68,44 +75,47 @@ export default function Dashboard() {
 
   return (
     <div>
+      <UpcomingEvents events={reminders as unknown as Reminder[]} />
+
       <section
         aria-labelledby="summary-heading"
-        className="mt-16 rounded-lg bg-gray-50 px-4 py-6 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8"
+        className="mt-16 rounded-lg lg:col-span-5"
       >
         <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-          Hola {user.name}, {status.text}:
-        </h1>
-
-        <div className="mt-3">
-          <p
-            className={"text-3xl tracking-tight text-gray-900 " + status.color}
+          Hola {user.name}, {status.text}:{" "}
+          <span
+            className={
+              "text-3xl tracking-tight text-gray-900 font-normal " +
+              status.color
+            }
           >
-            {Dinero({ amount: balance }).toFormat("$0,0.00").replace("-", "")}
-          </p>
-        </div>
+            {Dinero({ amount: balance }).toFormat("$0,0.00").replace("-", "")}{" "}
+            MXN
+          </span>
+        </h1>
       </section>
       <section
         aria-labelledby="summary-heading"
-        className="mt-16 rounded-lg bg-gray-50 px-4 py-6 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8"
+        className="mt-8 rounded-lg lg:col-span-5 "
       >
         <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-          Panini House, {paniniStatus.text}:
-        </h1>
-
-        <div className="mt-3">
-          <p
+          Panini House, {paniniStatus.text}:{" "}
+          <span
             className={
-              "text-3xl tracking-tight text-gray-900 " + paniniStatus.color
+              "text-3xl tracking-tight text-gray-900 font-normal " +
+              paniniStatus.color
             }
           >
             {Dinero({ amount: paniniBalance })
               .toFormat("$0,0.00")
-              .replace("-", "")}
-          </p>
-        </div>
+              .replace("-", "")}{" "}
+            MXN
+          </span>
+        </h1>
+
         <h2
           id="summary-heading"
-          className="text-center text-lg font-medium text-gray-900"
+          className="text-center mt-6 text-lg font-medium text-gray-900"
         >
           Gastos por categoría
         </h2>

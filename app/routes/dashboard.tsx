@@ -9,6 +9,7 @@ import {
   ShoppingBagIcon,
   TagIcon,
   XMarkIcon,
+  CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
 import {
   ChevronDownIcon,
@@ -38,6 +39,12 @@ const navigation = [
     name: "Pagos",
     href: "/dashboard/Payment",
     icon: CreditCardIcon,
+    current: false,
+  },
+  {
+    name: "Recordatorios",
+    href: "/dashboard/Reminder",
+    icon: CalendarDaysIcon,
     current: false,
   },
 ];
@@ -141,7 +148,7 @@ export default function Dashboard() {
                                         : isActive
                                         ? "bg-gray-50 text-indigo-600"
                                         : "",
-                                      "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6"
+                                      "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
                                     )
                                   }
                                 >
@@ -201,7 +208,7 @@ export default function Dashboard() {
                                 : isActive
                                 ? "bg-gray-50 text-indigo-600"
                                 : "",
-                              "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6"
+                              "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
                             )
                           }
                         >
@@ -306,7 +313,7 @@ export default function Dashboard() {
                                 href={item.href}
                                 className={classNames(
                                   active ? "bg-gray-50" : "",
-                                  "block px-3 py-1 text-sm leading-6 text-gray-900"
+                                  "block px-3 py-1 text-sm leading-6 text-gray-900",
                                 )}
                               >
                                 {item.name}

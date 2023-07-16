@@ -85,3 +85,16 @@ model Payment {
   sender   User @relation(fields: [senderId], references: [id], name: "Sender")
   receiver User @relation(fields: [receiverId], references: [id], name: "Receiver")
 }
+
+model Reminder {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @default("")
+  date        DateTime
+  allDay      Boolean  @default(false)
+  color       String   @default("#000000")
+  repeat      String   @default("never")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
