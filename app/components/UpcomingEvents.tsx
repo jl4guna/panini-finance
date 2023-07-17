@@ -14,17 +14,17 @@ export default function UpcomingEvents({ events }: Props) {
       </h2>
       <ol className="mt-2 divide-y divide-gray-200 text-sm leading-6 text-gray-500">
         {events.map((event) => (
-          <li key={event.id} className="py-4 sm:flex">
+          <li key={event.id} className="py-4 flex">
             <time
               dateTime={format(new Date(event.date), "yyyy-MM-dd")}
               className="w-28 flex-none"
             >
               {format(new Date(event.date), "E dd/LL")}
             </time>
-            <p className="mt-2 flex-auto font-semibold text-gray-900 sm:mt-0">
+            <p className="flex-auto font-semibold text-gray-900 mt-0">
               {event.title}
             </p>
-            <p className="flex-none sm:ml-6">
+            <p className="flex-none ml-6">
               {event.allDay ? (
                 "Todo el día"
               ) : (

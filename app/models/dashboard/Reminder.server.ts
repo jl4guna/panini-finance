@@ -79,8 +79,22 @@ export async function getUpcomingReminders() {
   // Get the next 5 overall reminders including the non-repeat ones orderBy date
   const upcomingReminders = (nonRepeatReminders as Reminder[]).concat(yearlyReminders, monthlyReminders, weeklyReminders, dailyReminders);
 
+
+  // Filter out the reminders that are not upcoming only taking in consideration day and month
+  const filteredReminders = upcomingReminders.filter((reminder) => {
+    const reminderDate = new Date(reminder.date);
+
+    if (reminderDate.getMonth() === currentDate.getMonth()) {
+      return reminderDate.getDate() >= currentDate.getDate();
+    }
+
+    return reminderDate.getMonth() >= currentDate.getMonth();
+  });
+  
+
+
   // Sort the reminders by date ascending only taking in consideration day and month
-  upcomingReminders.sort((a, b) => {
+  filteredReminders.sort((a, b) => {
     const aDate = new Date(a.date);
     const bDate = new Date(b.date);
 
@@ -92,7 +106,7 @@ export async function getUpcomingReminders() {
   });
 
 
-  return upcomingReminders.slice(0, 5);
+  return upcomingReminders.slice(0, 3);
 
 }
 
