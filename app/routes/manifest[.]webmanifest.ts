@@ -4,12 +4,12 @@ import type { LoaderFunction } from "@remix-run/node";
 export let loader: LoaderFunction = async () => {
   return json(
     {
-      short_name: "PWA",
-      name: "Remix PWA",
+      short_name: "Panini",
+      name: "Panini App",
       start_url: "/",
       display: "standalone",
       background_color: "#d3d7dd",
-      theme_color: "#c34138",
+      theme_color: "#d3d7dd",
       shortcuts: [
         {
           name: "Homepage",

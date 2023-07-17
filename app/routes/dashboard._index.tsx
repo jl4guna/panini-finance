@@ -75,13 +75,11 @@ export default function Dashboard() {
 
   return (
     <div>
-      <UpcomingEvents events={reminders as unknown as Reminder[]} />
-
       <section
         aria-labelledby="summary-heading"
-        className="mt-16 rounded-lg lg:col-span-5"
+        className="rounded-lg lg:col-span-5"
       >
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+        <h2 className="text-3xl font-bold tracking-tight text-gray-900">
           Hola {user.name}, {status.text}:{" "}
           <span
             className={
@@ -92,13 +90,8 @@ export default function Dashboard() {
             {Dinero({ amount: balance }).toFormat("$0,0.00").replace("-", "")}{" "}
             MXN
           </span>
-        </h1>
-      </section>
-      <section
-        aria-labelledby="summary-heading"
-        className="mt-8 rounded-lg lg:col-span-5 "
-      >
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+        </h2>
+        <h2 className="text-3xl mt-4 font-bold tracking-tight text-gray-900">
           Panini House, {paniniStatus.text}:{" "}
           <span
             className={
@@ -111,8 +104,13 @@ export default function Dashboard() {
               .replace("-", "")}{" "}
             MXN
           </span>
-        </h1>
-
+        </h2>
+      </section>
+      <UpcomingEvents events={reminders as unknown as Reminder[]} />
+      <section
+        aria-labelledby="summary-heading"
+        className="mt-8 rounded-lg lg:col-span-5 "
+      >
         <h2
           id="summary-heading"
           className="text-center mt-6 text-lg font-medium text-gray-900"
