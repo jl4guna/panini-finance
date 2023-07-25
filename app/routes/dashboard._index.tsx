@@ -167,11 +167,10 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {categories.map((category: Category) => {
+        {categories.map((category) => {
           const total =
-            spentByCategory.find(
-              (spent: Category) => spent.categoryId === category.id,
-            )?._sum.amount || 0;
+            spentByCategory.find((spent) => spent.categoryId === category.id)
+              ?._sum.amount || 0;
           return (
             <dl key={category.id} className="mt-6 space-y-4">
               <div className="flex items-center justify-between">
