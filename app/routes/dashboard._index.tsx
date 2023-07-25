@@ -4,6 +4,7 @@ import { requireUser } from "~/session.server";
 import { useLoaderData } from "@remix-run/react";
 import { formatDate, getUserBalance } from "~/utils";
 import { getPaniniTotalSpentByCategory } from "~/models/dashboard/Transaction.server";
+import type { Category } from "~/models/dashboard/Category.server";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -118,7 +119,7 @@ export default function Dashboard() {
           Gastos por categoría
         </h2>
         <div className="border-b border-gray-900/10 pb-12">
-          <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+          <div className="mt-4 sm:mt-10 sm:grid flex justify-between gap-x-6 gap-y-8 sm:grid-cols-6">
             <div className="sm:col-span-3">
               <label
                 htmlFor="date"
@@ -166,10 +167,11 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {categories.map((category) => {
+        {categories.map((category: Category) => {
           const total =
-            spentByCategory.find((spent) => spent.categoryId === category.id)
-              ?._sum.amount || 0;
+            spentByCategory.find(
+              (spent: Category) => spent.categoryId === category.id,
+            )?._sum.amount || 0;
           return (
             <dl key={category.id} className="mt-6 space-y-4">
               <div className="flex items-center justify-between">

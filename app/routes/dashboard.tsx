@@ -329,11 +329,100 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <main className="py-10">
+          <main className="pt-10 pb-32">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
               <Outlet />
             </div>
           </main>
+        </div>
+      </div>
+      {/* Mobile menu bar */}
+      <div className="sm:hidden">
+        <div className="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 pb-4 sm:px-6 lg:px-8">
+            <div className="h-16 flex items-center justify-between">
+              <NavLink
+                to="/dashboard"
+                end
+                className={({ isActive, isPending }) =>
+                  classNames(
+                    isPending
+                      ? "text-gray-700 hover:text-indigo-600"
+                      : isActive
+                      ? "text-indigo-600"
+                      : "",
+                    "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
+                  )
+                }
+              >
+                <HomeIcon className="h-6 w-6" aria-hidden="true" />
+              </NavLink>
+              <NavLink
+                to="/dashboard/Category"
+                end
+                className={({ isActive, isPending }) =>
+                  classNames(
+                    isPending
+                      ? "text-gray-700 hover:text-indigo-600"
+                      : isActive
+                      ? "text-indigo-600"
+                      : "",
+                    "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
+                  )
+                }
+              >
+                <TagIcon className="h-6 w-6" aria-hidden="true" />
+              </NavLink>
+              <NavLink
+                to="/dashboard/Transaction"
+                end
+                className={({ isActive, isPending }) =>
+                  classNames(
+                    isPending
+                      ? "text-gray-700 hover:text-indigo-600"
+                      : isActive
+                      ? "text-indigo-600"
+                      : "",
+                    "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
+                  )
+                }
+              >
+                <ShoppingBagIcon className="h-6 w-6" aria-hidden="true" />
+              </NavLink>
+              <NavLink
+                to="/dashboard/Payment"
+                end
+                className={({ isActive, isPending }) =>
+                  classNames(
+                    isPending
+                      ? "text-gray-700 hover:text-indigo-600"
+                      : isActive
+                      ? "text-indigo-600"
+                      : "",
+                    "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
+                  )
+                }
+              >
+                <CreditCardIcon className="h-6 w-6" aria-hidden="true" />
+              </NavLink>
+              <NavLink
+                to="/dashboard/Reminder"
+                end
+                className={({ isActive, isPending }) =>
+                  classNames(
+                    isPending
+                      ? "text-gray-700 hover:text-indigo-600"
+                      : isActive
+                      ? "text-indigo-600"
+                      : "",
+                    "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
+                  )
+                }
+              >
+                <CalendarDaysIcon className="h-6 w-6" aria-hidden="true" />
+              </NavLink>
+            </div>
+          </div>
         </div>
       </div>
     </>

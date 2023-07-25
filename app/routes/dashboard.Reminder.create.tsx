@@ -245,7 +245,7 @@ export default function CreateReminder() {
             </div>
           </div>
         </div>
-        <div className="mt-6 flex items-center justify-end gap-x-6">
+        <div className="mt-6 flex items-center justify-end gap-x-6 px-4">
           <Link to="/dashboard/Reminder">
             <button
               type="button"

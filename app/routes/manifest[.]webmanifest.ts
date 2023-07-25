@@ -8,8 +8,10 @@ export let loader: LoaderFunction = async () => {
       name: "Panini App",
       start_url: "/",
       display: "standalone",
-      background_color: "#d3d7dd",
-      theme_color: "#d3d7dd",
+      background_color: "#6365f1",
+      theme_color: "#6365f1",
+      launchImage: "/icons/apple-icon-180x180.png",
+
       shortcuts: [
         {
           name: "Homepage",
