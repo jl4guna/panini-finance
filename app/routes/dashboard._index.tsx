@@ -4,7 +4,6 @@ import { requireUser } from "~/session.server";
 import { useLoaderData } from "@remix-run/react";
 import { formatDate, getUserBalance } from "~/utils";
 import { getPaniniTotalSpentByCategory } from "~/models/dashboard/Transaction.server";
-import type { Category } from "~/models/dashboard/Category.server";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
