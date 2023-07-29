@@ -10,6 +10,7 @@ import { Switch } from "@headlessui/react";
 import { classNames } from "~/utils";
 import Select from "~/components/Select";
 import { REMINDER_REPEAT_OPTIONS } from "~/utils/constants";
+import { format } from "date-fns";
 
 function getClassName(error: boolean) {
   const errorClasses =
@@ -109,7 +110,7 @@ export default function CreateReminder() {
                   type="datetime-local"
                   id="date"
                   name="date"
-                  defaultValue={""}
+                  defaultValue={format(new Date(), "yyyy-MM-dd'T'kk:mm")}
                   className={getClassName(Boolean(errors?.date))}
                   required={true}
                 />
