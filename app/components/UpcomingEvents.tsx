@@ -1,21 +1,13 @@
 import type { Reminder } from "@prisma/client";
 import { format, formatISO } from "date-fns";
 import React from "react";
+import { ClientOnly } from "remix-utils";
 
 type Props = {
   events: Reminder[];
 };
 
-let isHydrating = true;
-
 export default function UpcomingEvents({ events }: Props) {
-  const [isHydrated, setIsHydrated] = React.useState(!isHydrating);
-
-  React.useEffect(() => {
-    isHydrating = false;
-    setIsHydrated(true);
-  }, []);
-
   return (
     <section className="mt-8">
       <h2 className="text-base font-semibold leading-6 text-gray-900">
@@ -33,17 +25,19 @@ export default function UpcomingEvents({ events }: Props) {
             <p className="flex-auto font-semibold text-gray-900 mt-0">
               {event.title}
             </p>
-            {isHydrated && (
-              <p className="flex-none ml-6">
-                {event.allDay ? (
-                  "Todo el día"
-                ) : (
-                  <time dateTime={formatISO(new Date(event.date))}>
-                    {format(new Date(event.date), "hh:mm a")}
-                  </time>
-                )}
-              </p>
-            )}
+            <ClientOnly fallback={<p>Loading...</p>}>
+              {() => (
+                <p className="flex-none ml-6">
+                  {event.allDay ? (
+                    "Todo el día"
+                  ) : (
+                    <time dateTime={formatISO(new Date(event.date))}>
+                      {format(new Date(event.date), "hh:mm a")}
+                    </time>
+                  )}
+                </p>
+              )}
+            </ClientOnly>
           </li>
         ))}
       </ol>
