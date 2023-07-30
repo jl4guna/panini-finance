@@ -29,7 +29,14 @@ export default function UpcomingEvents({ events }: Props) {
                 "Todo el día"
               ) : (
                 <time dateTime={format(new Date(event.date), "yyyy-MM-dd")}>
-                  {format(new Date(event.date), "hh:mm a")}
+                  {format(
+                    new Date(
+                      new Date(event.date).toLocaleString("en-US", {
+                        timeZone: "America/Hermosillo",
+                      }),
+                    ),
+                    "hh:mm a",
+                  )}
                 </time>
               )}
             </p>

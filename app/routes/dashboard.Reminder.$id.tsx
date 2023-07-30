@@ -49,15 +49,6 @@ export async function action({ request, params }: ActionArgs) {
   invariant(typeof color === "string", "Invalid color");
   invariant(typeof repeat === "string", "Invalid repeat");
 
-  console.log({
-    date,
-    date2: new Date(
-      new Date(date).toLocaleString("en-US", {
-        timeZone: "America/Hermosillo",
-      }),
-    ),
-  });
-
   await updateReminder({
     id,
     title,
