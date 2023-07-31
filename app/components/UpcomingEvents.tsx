@@ -7,6 +7,7 @@ type Props = {
 };
 
 export default function UpcomingEvents({ events }: Props) {
+  console.log({ events });
   return (
     <section className="mt-8">
       <h2 className="text-base font-semibold leading-6 text-gray-900">
@@ -30,7 +31,12 @@ export default function UpcomingEvents({ events }: Props) {
                   {event.allDay ? (
                     "Todo el día"
                   ) : (
-                    <span>{formatISO(new Date(event.date)).slice(11, 16)}</span>
+                    <>
+                      <span>
+                        {formatISO(new Date(event.date)).slice(11, 16)}
+                      </span>
+                      <span>{`${event.date}`.slice(11, 16)}</span>
+                    </>
                   )}
                 </p>
               )}
