@@ -1,5 +1,6 @@
 import type { Reminder } from "@prisma/client";
 import { format, formatISO } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import { ClientOnly } from "remix-utils";
 
 type Props = {
@@ -7,7 +8,6 @@ type Props = {
 };
 
 export default function UpcomingEvents({ events }: Props) {
-  console.log({ events });
   return (
     <section className="mt-8">
       <h2 className="text-base font-semibold leading-6 text-gray-900">
@@ -31,12 +31,13 @@ export default function UpcomingEvents({ events }: Props) {
                   {event.allDay ? (
                     "Todo el día"
                   ) : (
-                    <>
-                      <span>
-                        {formatISO(new Date(event.date)).slice(11, 16)}
-                      </span>
-                      <span>{`${event.date}`.slice(11, 16)}</span>
-                    </>
+                    <time dateTime={formatISO(new Date(event.date))}>
+                      {formatInTimeZone(
+                        new Date(event.date),
+                        "America/Hermosillo",
+                        "hh:mm a",
+                      )}
+                    </time>
                   )}
                 </p>
               )}

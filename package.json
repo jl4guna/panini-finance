@@ -38,6 +38,7 @@
     "bcryptjs": "^2.4.3",
     "cross-env": "^7.0.3",
     "date-fns": "^2.30.0",
+    "date-fns-tz": "^2.0.0",
     "dinero.js": "^1.9.1",
     "dotenv": "^16.0.3",
     "isbot": "^3.6.12",
