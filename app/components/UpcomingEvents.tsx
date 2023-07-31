@@ -32,7 +32,11 @@ export default function UpcomingEvents({ events }: Props) {
                     "Todo el día"
                   ) : (
                     <time dateTime={formatISO(new Date(event.date))}>
-                      {format(new Date(event.date), "hh:mm a")}
+                      {new Date(event.date).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                      })}
                     </time>
                   )}
                 </p>
