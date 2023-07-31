@@ -30,9 +30,7 @@ export default function UpcomingEvents({ events }: Props) {
                   {event.allDay ? (
                     "Todo el día"
                   ) : (
-                    <time dateTime={formatISO(new Date(event.date))}>
-                      {formatISO(new Date(event.date)).slice(11, 16)}
-                    </time>
+                    <span>{formatISO(new Date(event.date)).slice(11, 16)}</span>
                   )}
                 </p>
               )}
