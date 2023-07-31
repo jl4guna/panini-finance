@@ -33,7 +33,7 @@ export default function UpcomingEvents({ events }: Props) {
                   ) : (
                     <time dateTime={formatISO(new Date(event.date))}>
                       {formatInTimeZone(
-                        new Date(event.date),
+                        event.date,
                         "America/Hermosillo",
                         "hh:mm a",
                       )}
