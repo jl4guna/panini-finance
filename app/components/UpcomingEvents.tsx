@@ -1,6 +1,5 @@
 import type { Reminder } from "@prisma/client";
 import { format, formatISO } from "date-fns";
-import React from "react";
 import { ClientOnly } from "remix-utils";
 
 type Props = {
@@ -32,11 +31,7 @@ export default function UpcomingEvents({ events }: Props) {
                     "Todo el día"
                   ) : (
                     <time dateTime={formatISO(new Date(event.date))}>
-                      {new Date(event.date).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                      })}
+                      {formatISO(new Date(event.date)).slice(11, 16)}
                     </time>
                   )}
                 </p>
