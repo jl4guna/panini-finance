@@ -1,7 +1,6 @@
 import type { Reminder } from "@prisma/client";
 import { format, formatISO } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
-import { ClientOnly } from "remix-utils";
 
 type Props = {
   events: Reminder[];
@@ -25,23 +24,19 @@ export default function UpcomingEvents({ events }: Props) {
             <p className="flex-auto font-semibold text-gray-900 mt-0">
               {event.title}
             </p>
-            <ClientOnly fallback={<p>Loading...</p>}>
-              {() => (
-                <p className="flex-none ml-6">
-                  {event.allDay ? (
-                    "Todo el día"
-                  ) : (
-                    <time dateTime={formatISO(new Date(event.date))}>
-                      {formatInTimeZone(
-                        event.date,
-                        "America/Hermosillo",
-                        "hh:mm a",
-                      )}
-                    </time>
+            <p className="flex-none ml-6">
+              {event.allDay ? (
+                "Todo el día"
+              ) : (
+                <time dateTime={formatISO(new Date(event.date))}>
+                  {formatInTimeZone(
+                    event.date,
+                    "America/Hermosillo",
+                    "hh:mm a",
                   )}
-                </p>
+                </time>
               )}
-            </ClientOnly>
+            </p>
           </li>
         ))}
       </ol>

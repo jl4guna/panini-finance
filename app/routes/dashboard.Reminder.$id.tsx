@@ -49,6 +49,8 @@ export async function action({ request, params }: ActionArgs) {
   invariant(typeof color === "string", "Invalid color");
   invariant(typeof repeat === "string", "Invalid repeat");
 
+  console.log({ date, date2: new Date(date).valueOf() });
+
   await updateReminder({
     id,
     title,
