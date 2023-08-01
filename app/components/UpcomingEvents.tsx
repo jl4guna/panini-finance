@@ -29,11 +29,7 @@ export default function UpcomingEvents({ events }: Props) {
                 "Todo el día"
               ) : (
                 <time dateTime={formatISO(new Date(event.date))}>
-                  {formatInTimeZone(
-                    event.date,
-                    "America/Hermosillo",
-                    "hh:mm a",
-                  )}
+                  {formatInTimeZone(event.date, "Europe/London", "hh:mm a")}
                 </time>
               )}
             </p>
