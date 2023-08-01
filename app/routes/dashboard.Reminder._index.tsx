@@ -2,7 +2,7 @@ import { SwatchIcon } from "@heroicons/react/20/solid";
 import { Link, useLoaderData } from "@remix-run/react";
 import type { LoaderArgs } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
-import format from "date-fns/format";
+import { formatInTimeZone } from "date-fns-tz";
 import type { Reminder as ReminderType } from "~/models/dashboard/Reminder.server";
 import { getReminderListItems } from "~/models/dashboard/Reminder.server";
 import { REMINDER_REPEAT_OPTIONS } from "~/utils/constants";
@@ -93,7 +93,11 @@ export default function Reminder() {
                     {reminder.description}
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    {format(new Date(reminder.date), "dd/MM/yyyy - hh:mm a")}
+                    {formatInTimeZone(
+                      reminder.date,
+                      "Africa/Accra",
+                      "dd/MM/yyyy - hh:mm a",
+                    )}
                   </td>
                   <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
                     {reminder.allDay ? "Si" : "No"}

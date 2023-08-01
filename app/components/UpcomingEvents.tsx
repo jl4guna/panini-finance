@@ -1,5 +1,4 @@
 import type { Reminder } from "@prisma/client";
-import { format, formatISO } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 
 type Props = {
@@ -15,12 +14,9 @@ export default function UpcomingEvents({ events }: Props) {
       <ol className="mt-2 divide-y divide-gray-200 text-sm leading-6 text-gray-500">
         {events.map((event) => (
           <li key={event.id} className="py-4 flex">
-            <time
-              dateTime={format(new Date(event.date), "yyyy-MM-dd")}
-              className="w-28 flex-none"
-            >
-              {format(new Date(event.date), "E dd/LL")}
-            </time>
+            <span className="w-28 flex-none">
+              {formatInTimeZone(event.date, "Africa/Accra", "E dd/LL")}
+            </span>
             <p className="flex-auto font-semibold text-gray-900 mt-0">
               {event.title}
             </p>
@@ -28,9 +24,9 @@ export default function UpcomingEvents({ events }: Props) {
               {event.allDay ? (
                 "Todo el día"
               ) : (
-                <time dateTime={formatISO(new Date(event.date))}>
-                  {formatInTimeZone(event.date, "Europe/London", "hh:mm a")}
-                </time>
+                <span>
+                  {formatInTimeZone(event.date, "Africa/Accra", "hh:mm a")}
+                </span>
               )}
             </p>
           </li>

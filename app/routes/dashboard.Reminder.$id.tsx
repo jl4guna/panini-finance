@@ -13,7 +13,7 @@ import { Switch } from "@headlessui/react";
 import { useState } from "react";
 import Select from "~/components/Select";
 import { REMINDER_REPEAT_OPTIONS } from "../utils/constants";
-import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 
 function getClassName(error: boolean) {
   const errorClasses =
@@ -48,8 +48,6 @@ export async function action({ request, params }: ActionArgs) {
   invariant(typeof allDay === "string", "Invalid allDay");
   invariant(typeof color === "string", "Invalid color");
   invariant(typeof repeat === "string", "Invalid repeat");
-
-  console.log({ date, date2: new Date(date).valueOf() });
 
   await updateReminder({
     id,
@@ -127,8 +125,9 @@ export default function UpdateReminder() {
                   type="datetime-local"
                   id="date"
                   name="date"
-                  defaultValue={format(
+                  defaultValue={formatInTimeZone(
                     new Date(reminder?.date || ""),
+                    "Africa/Accra",
                     "yyyy-MM-dd'T'kk:mm",
                   )}
                   className={getClassName(Boolean(errors?.date))}
