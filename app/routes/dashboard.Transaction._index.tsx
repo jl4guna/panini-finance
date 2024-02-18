@@ -1,4 +1,4 @@
-import { Link, useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData, useNavigate } from "@remix-run/react";
 import type {
   LoaderFunctionArgs,
   ActionFunctionArgs,
@@ -8,12 +8,18 @@ import {
   deleteTransaction,
   getTransactionListItems,
 } from "~/models/dashboard/Transaction.server";
-import { classNames, formatDateToDisplay, generateFormRandomId } from "~/utils";
+import {
+  classNames,
+  formatDate,
+  formatDateToDisplay,
+  generateFormRandomId,
+  isValidDate,
+} from "~/utils";
 import Dinero from "dinero.js";
 import Icon from "~/components/Icon";
 import type { Alert } from "~/components/ConfirmAlert";
 import ConfirmAlert from "~/components/ConfirmAlert";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { requireUserId } from "~/session.server";
 import invariant from "tiny-invariant";
 import { Listbox, Transition } from "@headlessui/react";
@@ -37,18 +43,58 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const searchParams = new URL(request.url).searchParams as any;
-  const { filter, search } = Object.fromEntries(searchParams.entries());
+  const { filter, search, start, end } = Object.fromEntries(
+    searchParams.entries(),
+  );
 
-  const transactions = await getTransactionListItems(filter, search);
+  const startDate = start ? new Date(start) : new Date();
+  if (!start) {
+    //Get the first day of the month
+    startDate.setDate(0);
+  }
+  const endDate = end ? new Date(end) : new Date();
+
+  console.log(startDate, endDate);
+
+  const transactions = await getTransactionListItems(
+    filter,
+    search,
+    startDate,
+    endDate,
+  );
   const categories = await getCategoryListItems();
 
   const category = categories.find((c) => c.name === filter);
 
-  return json({ transactions, categories, category, search });
+  return json({
+    transactions,
+    categories,
+    category,
+    search,
+    range: {
+      startDate: formatDate(startDate),
+      endDate: formatDate(endDate),
+    },
+  });
 }
 export default function Transaction() {
-  const { transactions, categories, category, search } =
+  const { transactions, categories, category, search, range } =
     useLoaderData<typeof loader>();
+  const navigate = useNavigate();
+
+  const [startDate, setStartDate] = useState(range.startDate);
+  const [endDate, setEndDate] = useState(range.endDate);
+  const [filter, setFilter] = useState(category?.name);
+
+  useEffect(() => {
+    if (isValidDate(startDate) && isValidDate(endDate)) {
+      navigate(
+        `/dashboard/Transaction?start=${startDate}&end=${endDate}${
+          filter ? "&filter=" + filter : ""
+        }${search ? "&search=" + search : ""}`,
+      );
+    }
+  }, [startDate, endDate, navigate, filter, search]);
 
   const [openConfirm, setOpenConfirm] = useState<Alert>({
     open: false,
@@ -68,11 +114,7 @@ export default function Transaction() {
               <span className="mr text-sm font-medium text-gray-500 group-hover:text-gray-700">
                 {search}
               </span>
-              <Link
-                to={`/dashboard/Transaction${
-                  category ? "?filter=" + category.name : ""
-                }`}
-              >
+              <Link to={"/dashboard/Transaction"}>
                 <XCircleIcon
                   className="h-4 w-4 flex-shrink-0 text-gray-400 group-hover:text-gray-700 cursor-pointer"
                   aria-hidden="true"
@@ -99,12 +141,64 @@ export default function Transaction() {
             </Link>
           </div>
         </div>
+        <div className=" pb-2">
+          <div className="mt-4 sm:mt-10 sm:grid flex justify-between gap-x-6 gap-y-8 sm:grid-cols-6">
+            <div className="sm:col-span-3">
+              <label
+                htmlFor="date"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Desde
+              </label>
+              <div className="relative mt-2">
+                <input
+                  type="date"
+                  id="date"
+                  name="date"
+                  defaultValue={startDate}
+                  className="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  required={true}
+                  onChange={(e) => {
+                    const date = e.target.value;
+                    if (isValidDate(date)) {
+                      setStartDate(formatDate(date));
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            <div className="sm:col-span-3">
+              <label
+                htmlFor="date"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Hasta
+              </label>
+              <div className="relative mt-2">
+                <input
+                  type="date"
+                  id="date"
+                  name="date"
+                  defaultValue={endDate}
+                  className="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  required={true}
+                  onChange={(e) => {
+                    const date = e.target.value;
+                    if (isValidDate(date)) {
+                      setEndDate(formatDate(new Date(date)));
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
         <div key={generateFormRandomId()} className="mt-4 w-full md:w-1/3">
           <Listbox value={category}>
             {({ open }) => (
               <>
                 <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">
-                  Filtrar por categoria
+                  Filtrar por categoría
                 </Listbox.Label>
                 <div className="relative mt-2">
                   <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
@@ -114,7 +208,7 @@ export default function Transaction() {
                         color={category?.color || ""}
                       />
                       <span className="ml-3 block truncate">
-                        {category?.name || "Todas las categorias"}
+                        {category?.name || "Todas las categorías"}
                       </span>
                     </span>
                     <span className="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
@@ -145,7 +239,7 @@ export default function Transaction() {
                         value={null}
                       >
                         {({ selected }) => (
-                          <Link to="/dashboard/Transaction">
+                          <div onClick={() => setFilter("")}>
                             <div className="flex items-center">
                               <span
                                 className={classNames(
@@ -153,10 +247,10 @@ export default function Transaction() {
                                   "ml-3 block truncate",
                                 )}
                               >
-                                Todas las categorias
+                                Todas las categorías
                               </span>
                             </div>
-                          </Link>
+                          </div>
                         )}
                       </Listbox.Option>
 
@@ -174,27 +268,24 @@ export default function Transaction() {
                           value={category}
                         >
                           {({ selected }) => (
-                            <Link
-                              to={`/dashboard/Transaction?filter=${
-                                category.name
-                              }${search ? `&search=${search}` : ""}`}
+                            <div
+                              onClick={() => setFilter(category.name)}
+                              className="flex items-center"
                             >
-                              <div className="flex items-center">
-                                <Icon
-                                  name={category.icon || ""}
-                                  color={category.color}
-                                />
+                              <Icon
+                                name={category.icon || ""}
+                                color={category.color}
+                              />
 
-                                <span
-                                  className={classNames(
-                                    selected ? "font-semibold" : "font-normal",
-                                    "ml-3 block truncate",
-                                  )}
-                                >
-                                  {category.name}
-                                </span>
-                              </div>
-                            </Link>
+                              <span
+                                className={classNames(
+                                  selected ? "font-semibold" : "font-normal",
+                                  "ml-3 block truncate",
+                                )}
+                              >
+                                {category.name}
+                              </span>
+                            </div>
                           )}
                         </Listbox.Option>
                       ))}
@@ -235,7 +326,7 @@ export default function Transaction() {
                     scope="col"
                     className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
                   >
-                    Pagante
+                    Pagador
                   </th>
                   <th
                     scope="col"

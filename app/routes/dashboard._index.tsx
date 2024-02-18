@@ -1,7 +1,7 @@
 import Dinero from "dinero.js";
 import { requireUser } from "~/session.server";
 import { useLoaderData } from "@remix-run/react";
-import { formatDate, getUserBalance } from "~/utils";
+import { formatDate, getUserBalance, isValidDate } from "~/utils";
 import { getTotalSpentByCategory } from "~/models/dashboard/Transaction.server";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
 import { useEffect, useState } from "react";
@@ -65,7 +65,7 @@ export default function Dashboard() {
   const [endDate, setEndDate] = useState(range.endDate);
 
   useEffect(() => {
-    if (startDate && endDate) {
+    if (isValidDate(startDate) && isValidDate(endDate)) {
       navigate(`/dashboard?start=${startDate}&end=${endDate}`);
     }
   }, [startDate, endDate, navigate]);
@@ -133,12 +133,14 @@ export default function Dashboard() {
                   type="date"
                   id="date"
                   name="date"
-                  value={startDate}
+                  defaultValue={startDate}
                   className="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   required={true}
                   onChange={(e) => {
-                    const date = new Date(e.target.value);
-                    setStartDate(formatDate(date));
+                    const date = e.target.value;
+                    if (isValidDate(date)) {
+                      setStartDate(formatDate(date));
+                    }
                   }}
                 />
               </div>
@@ -155,12 +157,14 @@ export default function Dashboard() {
                   type="date"
                   id="date"
                   name="date"
-                  value={endDate}
+                  defaultValue={endDate}
                   className="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   required={true}
                   onChange={(e) => {
-                    const date = new Date(e.target.value);
-                    setEndDate(formatDate(date));
+                    const date = e.target.value;
+                    if (isValidDate(date)) {
+                      setEndDate(formatDate(new Date(date)));
+                    }
                   }}
                 />
               </div>
