@@ -33,9 +33,9 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const searchParams = new URL(request.url).searchParams as any;
-  const { filter } = Object.fromEntries(searchParams.entries());
+  const { filter, search } = Object.fromEntries(searchParams.entries());
 
-  const transactions = await getTransactionListItems(filter);
+  const transactions = await getTransactionListItems(filter, search);
   const categories = await getCategoryListItems();
 
   const category = categories.find((c) => c.name === filter);
