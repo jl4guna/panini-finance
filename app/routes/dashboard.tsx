@@ -11,13 +11,11 @@ import {
   XMarkIcon,
   CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
-import {
-  ChevronDownIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/20/solid";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { getUser } from "~/session.server";
+import SearchTransactions from "~/components/SearchTransactions";
 
 export const meta: MetaFunction = () => [{ title: "Dashboard" }];
 
@@ -59,13 +57,15 @@ function classNames(...classes: string[]) {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  const searchParams = new URL(request.url).searchParams as any;
+  const { search } = Object.fromEntries(searchParams.entries());
   const user = await getUser(request);
   if (!user) return redirect("/");
-  return json({ user });
+  return json({ user, search });
 }
 
 export default function Dashboard() {
-  const { user } = useLoaderData<typeof loader>();
+  const { user, search } = useLoaderData<typeof loader>();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
@@ -256,22 +256,7 @@ export default function Dashboard() {
               />
 
               <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-                <form className="relative flex flex-1" action="#" method="GET">
-                  <label htmlFor="search-field" className="sr-only">
-                    Search
-                  </label>
-                  <MagnifyingGlassIcon
-                    className="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-400"
-                    aria-hidden="true"
-                  />
-                  <input
-                    id="search-field"
-                    className="block h-full w-full border-0 py-0 pl-8 pr-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm"
-                    placeholder="Search..."
-                    type="search"
-                    name="search"
-                  />
-                </form>
+                <SearchTransactions search={search as string} />
                 <div className="flex items-center gap-x-4 lg:gap-x-6">
                   {/* Separator */}
                   <div

@@ -17,7 +17,11 @@ import { Fragment, useState } from "react";
 import { requireUserId } from "~/session.server";
 import invariant from "tiny-invariant";
 import { Listbox, Transition } from "@headlessui/react";
-import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import {
+  ChevronRightIcon,
+  ChevronUpDownIcon,
+  XCircleIcon,
+} from "@heroicons/react/20/solid";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -33,17 +37,18 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const searchParams = new URL(request.url).searchParams as any;
-  const { filter } = Object.fromEntries(searchParams.entries());
+  const { filter, search } = Object.fromEntries(searchParams.entries());
 
-  const transactions = await getTransactionListItems(filter);
+  const transactions = await getTransactionListItems(filter, search);
   const categories = await getCategoryListItems();
 
   const category = categories.find((c) => c.name === filter);
 
-  return json({ transactions, categories, category });
+  return json({ transactions, categories, category, search });
 }
 export default function Transaction() {
-  const { transactions, categories, category } = useLoaderData<typeof loader>();
+  const { transactions, categories, category, search } =
+    useLoaderData<typeof loader>();
 
   const [openConfirm, setOpenConfirm] = useState<Alert>({
     open: false,
@@ -51,85 +56,84 @@ export default function Transaction() {
   });
 
   return (
-    <div className="sm:px-6 lg:px-8">
-      <div className="flex items-center justify-between">
-        <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900">Gastos</h1>
-          <p className="mt-2 text-sm text-gray-700">Registro de gastos</p>
+    <>
+      {search ? (
+        <div className="absolute top-[4.5rem]">
+          <section className="flex items-center">
+            <ChevronRightIcon
+              className="h-5 w-5 flex-shrink-0 text-gray-400"
+              aria-hidden="true"
+            />
+            <div className="flex items-center group">
+              <span className="mr text-sm font-medium text-gray-500 group-hover:text-gray-700">
+                {search}
+              </span>
+              <Link
+                to={`/dashboard/Transaction${
+                  category ? "?filter=" + category.name : ""
+                }`}
+              >
+                <XCircleIcon
+                  className="h-4 w-4 flex-shrink-0 text-gray-400 group-hover:text-gray-700 cursor-pointer"
+                  aria-hidden="true"
+                />
+              </Link>
+            </div>
+          </section>
         </div>
-        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <Link to="/dashboard/Transaction/create">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
-            >
-              Registrar Gasto
-            </button>
-          </Link>
+      ) : null}
+      <div className="sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between">
+          <div className="sm:flex-auto">
+            <h1 className="text-xl font-semibold text-gray-900">Gastos</h1>
+            <p className="mt-2 text-sm text-gray-700">Registro de gastos</p>
+          </div>
+          <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+            <Link to="/dashboard/Transaction/create">
+              <button
+                type="button"
+                className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
+              >
+                Registrar Gasto
+              </button>
+            </Link>
+          </div>
         </div>
-      </div>
-      <div key={generateFormRandomId()} className="mt-4 w-full md:w-1/3">
-        <Listbox value={category}>
-          {({ open }) => (
-            <>
-              <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">
-                Filtrar por categoria
-              </Listbox.Label>
-              <div className="relative mt-2">
-                <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
-                  <span className="flex items-center">
-                    <Icon
-                      name={category?.icon || ""}
-                      color={category?.color || ""}
-                    />
-                    <span className="ml-3 block truncate">
-                      {category?.name || "Todas las categorias"}
+        <div key={generateFormRandomId()} className="mt-4 w-full md:w-1/3">
+          <Listbox value={category}>
+            {({ open }) => (
+              <>
+                <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">
+                  Filtrar por categoria
+                </Listbox.Label>
+                <div className="relative mt-2">
+                  <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                    <span className="flex items-center">
+                      <Icon
+                        name={category?.icon || ""}
+                        color={category?.color || ""}
+                      />
+                      <span className="ml-3 block truncate">
+                        {category?.name || "Todas las categorias"}
+                      </span>
                     </span>
-                  </span>
-                  <span className="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
-                    <ChevronUpDownIcon
-                      className="h-5 w-5 text-gray-400"
-                      aria-hidden="true"
-                    />
-                  </span>
-                </Listbox.Button>
+                    <span className="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
+                      <ChevronUpDownIcon
+                        className="h-5 w-5 text-gray-400"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </Listbox.Button>
 
-                <Transition
-                  show={open}
-                  as={Fragment}
-                  leave="transition ease-in duration-100"
-                  leaveFrom="opacity-100"
-                  leaveTo="opacity-0"
-                >
-                  <Listbox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                    <Listbox.Option
-                      className={({ active }) =>
-                        classNames(
-                          active ? "bg-indigo-600 text-white" : "text-gray-900",
-                          "relative cursor-default select-none py-2 pl-3 pr-9",
-                        )
-                      }
-                      value={null}
-                    >
-                      {({ selected }) => (
-                        <Link to="/dashboard/Transaction">
-                          <div className="flex items-center">
-                            <span
-                              className={classNames(
-                                selected ? "font-semibold" : "font-normal",
-                                "ml-3 block truncate",
-                              )}
-                            >
-                              Todas las categorias
-                            </span>
-                          </div>
-                        </Link>
-                      )}
-                    </Listbox.Option>
-
-                    {categories.map((category) => (
+                  <Transition
+                    show={open}
+                    as={Fragment}
+                    leave="transition ease-in duration-100"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                  >
+                    <Listbox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                       <Listbox.Option
-                        key={category.id}
                         className={({ active }) =>
                           classNames(
                             active
@@ -138,151 +142,185 @@ export default function Transaction() {
                             "relative cursor-default select-none py-2 pl-3 pr-9",
                           )
                         }
-                        value={category}
+                        value={null}
                       >
                         {({ selected }) => (
-                          <Link
-                            to={`/dashboard/Transaction?filter=${category.name}`}
-                          >
+                          <Link to="/dashboard/Transaction">
                             <div className="flex items-center">
-                              <Icon
-                                name={category.icon || ""}
-                                color={category.color}
-                              />
-
                               <span
                                 className={classNames(
                                   selected ? "font-semibold" : "font-normal",
                                   "ml-3 block truncate",
                                 )}
                               >
-                                {category.name}
+                                Todas las categorias
                               </span>
                             </div>
                           </Link>
                         )}
                       </Listbox.Option>
-                    ))}
-                  </Listbox.Options>
-                </Transition>
-              </div>
-            </>
-          )}
-        </Listbox>
-      </div>
 
-      <div className="mt-8 flow-root overflow-hidden">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <table className="w-full text-left">
-            <thead className="bg-white">
-              <tr>
-                <th
-                  scope="col"
-                  className="relative isolate py-3.5 pr-3 text-left text-sm font-semibold text-gray-900"
-                >
-                  Descripción
-                  <div className="absolute inset-y-0 right-full -z-10 w-screen border-b border-b-gray-200" />
-                  <div className="absolute inset-y-0 left-0 -z-10 w-screen border-b border-b-gray-200" />
-                </th>
-                <th
-                  scope="col"
-                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
-                >
-                  Cantidad
-                </th>
-                <th
-                  scope="col"
-                  className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
-                >
-                  Fecha
-                </th>
-                <th
-                  scope="col"
-                  className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
-                >
-                  Pagante
-                </th>
-                <th
-                  scope="col"
-                  className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
-                >
-                  Panini House
-                </th>
-                <th
-                  scope="col"
-                  className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
-                >
-                  Categoría
-                </th>
-                <th
-                  scope="col"
-                  className="relative hidden py-3.5 pl-3 sm:table-cell"
-                >
-                  <span className="sr-only">Edit</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.map((transaction) => (
-                <tr key={transaction.id}>
-                  <td className="relative py-4 pr-3 text-sm font-medium text-gray-900">
-                    <Link to={`/dashboard/Transaction/${transaction.id}`}>
-                      {transaction.description}
-                      <div className="absolute bottom-0 right-full h-px w-screen bg-gray-100" />
-                      <div className="absolute bottom-0 left-0 h-px w-screen bg-gray-100" />
-                    </Link>
-                  </td>
-                  <td className="px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    {Dinero({ amount: transaction.amount }).toFormat("$0,0.00")}
-                  </td>
-                  <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    {formatDateToDisplay(transaction.date)}
-                  </td>
-                  <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    {transaction.user?.email}
-                  </td>
-                  <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    {transaction.panini ? "Si" : "No"}
-                  </td>
-                  <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                    <div className="flex items-center justify-start gap-2">
-                      <Icon
-                        name={transaction.category.icon || ""}
-                        color={transaction.category.color}
-                      />
-                      {transaction.category?.name}
-                    </div>
-                  </td>
-                  <td className="relative hidden py-4 pl-3 text-right text-sm font-medium sm:table-cell">
-                    <Link
-                      to={`/dashboard/Transaction/${transaction.id}`}
-                      className="pr-2 text-indigo-600 hover:text-indigo-900"
-                    >
-                      Editar
-                    </Link>
-                    <button
-                      onClick={() =>
-                        setOpenConfirm({
-                          open: true,
-                          action: transaction.id,
-                        })
-                      }
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Borrar
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      {categories.map((category) => (
+                        <Listbox.Option
+                          key={category.id}
+                          className={({ active }) =>
+                            classNames(
+                              active
+                                ? "bg-indigo-600 text-white"
+                                : "text-gray-900",
+                              "relative cursor-default select-none py-2 pl-3 pr-9",
+                            )
+                          }
+                          value={category}
+                        >
+                          {({ selected }) => (
+                            <Link
+                              to={`/dashboard/Transaction?filter=${
+                                category.name
+                              }${search ? `&search=${search}` : ""}`}
+                            >
+                              <div className="flex items-center">
+                                <Icon
+                                  name={category.icon || ""}
+                                  color={category.color}
+                                />
+
+                                <span
+                                  className={classNames(
+                                    selected ? "font-semibold" : "font-normal",
+                                    "ml-3 block truncate",
+                                  )}
+                                >
+                                  {category.name}
+                                </span>
+                              </div>
+                            </Link>
+                          )}
+                        </Listbox.Option>
+                      ))}
+                    </Listbox.Options>
+                  </Transition>
+                </div>
+              </>
+            )}
+          </Listbox>
         </div>
+
+        <div className="mt-8 flow-root overflow-hidden">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <table className="w-full text-left">
+              <thead className="bg-white">
+                <tr>
+                  <th
+                    scope="col"
+                    className="relative isolate py-3.5 pr-3 text-left text-sm font-semibold text-gray-900"
+                  >
+                    Descripción
+                    <div className="absolute inset-y-0 right-full -z-10 w-screen border-b border-b-gray-200" />
+                    <div className="absolute inset-y-0 left-0 -z-10 w-screen border-b border-b-gray-200" />
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+                  >
+                    Cantidad
+                  </th>
+                  <th
+                    scope="col"
+                    className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+                  >
+                    Fecha
+                  </th>
+                  <th
+                    scope="col"
+                    className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+                  >
+                    Pagante
+                  </th>
+                  <th
+                    scope="col"
+                    className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+                  >
+                    Panini House
+                  </th>
+                  <th
+                    scope="col"
+                    className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+                  >
+                    Categoría
+                  </th>
+                  <th
+                    scope="col"
+                    className="relative hidden py-3.5 pl-3 sm:table-cell"
+                  >
+                    <span className="sr-only">Edit</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.map((transaction) => (
+                  <tr key={transaction.id}>
+                    <td className="relative py-4 pr-3 text-sm font-medium text-gray-900">
+                      <Link to={`/dashboard/Transaction/${transaction.id}`}>
+                        {transaction.description}
+                        <div className="absolute bottom-0 right-full h-px w-screen bg-gray-100" />
+                        <div className="absolute bottom-0 left-0 h-px w-screen bg-gray-100" />
+                      </Link>
+                    </td>
+                    <td className="px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                      {Dinero({ amount: transaction.amount }).toFormat(
+                        "$0,0.00",
+                      )}
+                    </td>
+                    <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                      {formatDateToDisplay(transaction.date)}
+                    </td>
+                    <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                      {transaction.user?.email}
+                    </td>
+                    <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                      {transaction.panini ? "Si" : "No"}
+                    </td>
+                    <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                      <div className="flex items-center justify-start gap-2">
+                        <Icon
+                          name={transaction.category.icon || ""}
+                          color={transaction.category.color}
+                        />
+                        {transaction.category?.name}
+                      </div>
+                    </td>
+                    <td className="relative hidden py-4 pl-3 text-right text-sm font-medium sm:table-cell">
+                      <Link
+                        to={`/dashboard/Transaction/${transaction.id}`}
+                        className="pr-2 text-indigo-600 hover:text-indigo-900"
+                      >
+                        Editar
+                      </Link>
+                      <button
+                        onClick={() =>
+                          setOpenConfirm({
+                            open: true,
+                            action: transaction.id,
+                          })
+                        }
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Borrar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <ConfirmAlert
+          type="transaction"
+          alert={openConfirm}
+          setAlert={setOpenConfirm}
+        />
       </div>
-      <ConfirmAlert
-        type="transaction"
-        alert={openConfirm}
-        setAlert={setOpenConfirm}
-      />
-    </div>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import type { Transaction } from "@prisma/client";
 
 import { prisma } from "~/db.server";
+import { extractAmount } from '~/utils';
 
 export type { Transaction } from "@prisma/client";
 
@@ -12,16 +13,34 @@ export function getTransaction({
   });
 }
 
-export function getTransactionListItems(filter?: string) {
+export function getTransactionListItems(filter?: string, search?: string) {
+
+  const whereFilter = filter ? { category: { name: filter } } : {};
+
+  // If search is not empty and it is not parseable to float, we want to search for the description
+  let whereSearch: {
+    description?: {
+      contains: string;
+    };
+    amount?: {
+      equals: number;
+    };
+  } = search && isNaN(parseFloat(search)) ? { description: { contains: search } } : {};
+  // If search is not empty and it is parseable to float, we want to search for the amount
+  if (search && !isNaN(parseFloat(search))) {
+    const amount = extractAmount(search);
+    whereSearch = { amount: { equals: amount } };
+  }
 
   return prisma.transaction.findMany({
     orderBy: {
       date: "desc",
     },
     where: {
-      category: {
-        name: filter,
-      },
+      AND: [
+        whereFilter,
+        whereSearch,
+      ],
     },
     select: {
       id: true,
