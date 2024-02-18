@@ -77,6 +77,10 @@ export function addMissingDigit(digit: number) {
   return digit < 10 ? `0${digit}` : digit;
 }
 
+export function isValidDate(date: string) {
+  return !isNaN(Date.parse(date));
+}
+
 export function formatDate(date: string | Date = new Date()) {
   const formattedDate = new Date(date);
   return `${formattedDate.getUTCFullYear()}-${addMissingDigit(

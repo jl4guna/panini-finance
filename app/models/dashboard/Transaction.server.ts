@@ -13,7 +13,7 @@ export function getTransaction({
   });
 }
 
-export function getTransactionListItems(filter?: string, search?: string) {
+export function getTransactionListItems(filter?: string, search?: string, startDate?: Date, endDate?: Date) {
 
   const whereFilter = filter ? { category: { name: filter } } : {};
 
@@ -40,6 +40,7 @@ export function getTransactionListItems(filter?: string, search?: string) {
       AND: [
         whereFilter,
         whereSearch,
+        startDate && endDate ? { date: { gte: startDate, lte: endDate } } : {},
       ],
     },
     select: {
