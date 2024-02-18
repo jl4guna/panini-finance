@@ -17,7 +17,11 @@ import { Fragment, useState } from "react";
 import { requireUserId } from "~/session.server";
 import invariant from "tiny-invariant";
 import { Listbox, Transition } from "@headlessui/react";
-import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import {
+  ChevronRightIcon,
+  ChevronUpDownIcon,
+  XCircleIcon,
+} from "@heroicons/react/20/solid";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -40,10 +44,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const category = categories.find((c) => c.name === filter);
 
-  return json({ transactions, categories, category });
+  return json({ transactions, categories, category, search });
 }
 export default function Transaction() {
-  const { transactions, categories, category } = useLoaderData<typeof loader>();
+  const { transactions, categories, category, search } =
+    useLoaderData<typeof loader>();
 
   const [openConfirm, setOpenConfirm] = useState<Alert>({
     open: false,
@@ -55,6 +60,29 @@ export default function Transaction() {
       <div className="flex items-center justify-between">
         <div className="sm:flex-auto">
           <h1 className="text-xl font-semibold text-gray-900">Gastos</h1>
+          {search ? (
+            <section className="flex items-center">
+              <ChevronRightIcon
+                className="h-5 w-5 flex-shrink-0 text-gray-400"
+                aria-hidden="true"
+              />
+              <div className="flex items-center group">
+                <span className="mr text-sm font-medium text-gray-500 group-hover:text-gray-700">
+                  {search}
+                </span>
+                <Link
+                  to={`/dashboard/Transaction${
+                    category ? "?filter=" + category.name : ""
+                  }`}
+                >
+                  <XCircleIcon
+                    className="h-4 w-4 flex-shrink-0 text-gray-400 group-hover:text-gray-700 cursor-pointer"
+                    aria-hidden="true"
+                  />
+                </Link>
+              </div>
+            </section>
+          ) : null}
           <p className="mt-2 text-sm text-gray-700">Registro de gastos</p>
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
@@ -142,7 +170,9 @@ export default function Transaction() {
                       >
                         {({ selected }) => (
                           <Link
-                            to={`/dashboard/Transaction?filter=${category.name}`}
+                            to={`/dashboard/Transaction?filter=${
+                              category.name
+                            }${search ? `&search=${search}` : ""}`}
                           >
                             <div className="flex items-center">
                               <Icon
