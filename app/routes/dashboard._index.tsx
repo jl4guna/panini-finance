@@ -2,7 +2,7 @@ import Dinero from "dinero.js";
 import { requireUser } from "~/session.server";
 import { useLoaderData } from "@remix-run/react";
 import { formatDate, getUserBalance } from "~/utils";
-import { getPaniniTotalSpentByCategory } from "~/models/dashboard/Transaction.server";
+import { getTotalSpentByCategory } from "~/models/dashboard/Transaction.server";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -27,10 +27,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     startDate.setDate(0);
   }
   const endDate = end ? new Date(end) : new Date();
-  const spentByCategory = await getPaniniTotalSpentByCategory(
-    startDate,
-    endDate,
-  );
+  const spentByCategory = await getTotalSpentByCategory(startDate, endDate);
 
   const reminders = await getUpcomingReminders();
 
