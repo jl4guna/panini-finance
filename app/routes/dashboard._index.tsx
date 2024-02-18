@@ -1,5 +1,4 @@
 import Dinero from "dinero.js";
-import type { LoaderArgs } from "@remix-run/node";
 import { requireUser } from "~/session.server";
 import { useLoaderData } from "@remix-run/react";
 import { formatDate, getUserBalance } from "~/utils";
@@ -10,8 +9,9 @@ import { useNavigate } from "react-router-dom";
 import UpcomingEvents from "~/components/UpcomingEvents";
 import type { Reminder } from "~/models/dashboard/Reminder.server";
 import { getUpcomingReminders } from "~/models/dashboard/Reminder.server";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 
-export async function loader({ request, params }: LoaderArgs) {
+export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireUser(request);
   const searchParams = new URL(request.url).searchParams as any;
   const { start, end } = Object.fromEntries(searchParams.entries());

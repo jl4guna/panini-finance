@@ -15,11 +15,11 @@ import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
-import type { LoaderArgs, V2_MetaFunction } from "@remix-run/node";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { getUser } from "~/session.server";
 
-export const meta: V2_MetaFunction = () => [{ title: "Dashboard" }];
+export const meta: MetaFunction = () => [{ title: "Dashboard" }];
 
 const navigation = [
   { name: "Balance", href: "/dashboard", icon: HomeIcon, current: false },
@@ -58,14 +58,14 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const user = await getUser(request);
   if (!user) return redirect("/");
   return json({ user });
 }
 
 export default function Dashboard() {
-  const { user } = useLoaderData();
+  const { user } = useLoaderData<typeof loader>();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
