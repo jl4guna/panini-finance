@@ -70,6 +70,11 @@ export default function Dashboard() {
     }
   }, [startDate, endDate, navigate]);
 
+  const totalSpent = spentByCategory.reduce(
+    (acc, spent) => acc + (spent._sum?.amount ?? 0),
+    0,
+  );
+
   return (
     <div>
       <section
@@ -178,6 +183,14 @@ export default function Dashboard() {
             </dl>
           );
         })}
+        <dl className="mt-8 space-y-4 border-t-2">
+          <div className="flex items-center justify-between mt-2">
+            <dt className="text-sm font-bold text-gray-900">Total</dt>
+            <dd className="text-sm font-bold text-gray-900">
+              {Dinero({ amount: totalSpent }).toFormat("$0,0.00")}
+            </dd>
+          </div>
+        </dl>
       </section>
     </div>
   );
