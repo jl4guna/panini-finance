@@ -1,5 +1,5 @@
 import { Link, useActionData, Form } from "@remix-run/react";
-import type { ActionArgs } from "@remix-run/server-runtime";
+import type { ActionFunctionArgs } from "@remix-run/server-runtime";
 import { redirect, json } from "@remix-run/server-runtime";
 import invariant from "tiny-invariant";
 import { createUser } from "~/models/dashboard/User.server";
@@ -17,7 +17,7 @@ function getClassName(error: boolean) {
   return error ? className + errorClasses : className + normalClasses;
 }
 
-export async function action({ request }: ActionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
   await requireUserId(request);
   const formData = await request.formData();
   const { email, name } = Object.fromEntries(formData);
@@ -40,7 +40,6 @@ export async function action({ request }: ActionArgs) {
 
   return redirect(`/dashboard/User`);
 }
-
 
 export default function CreateUser() {
   const errors = useActionData<typeof action>();

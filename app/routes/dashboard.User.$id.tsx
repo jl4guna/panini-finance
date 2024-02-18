@@ -1,5 +1,8 @@
 import { Link, useActionData, Form, useLoaderData } from "@remix-run/react";
-import type { ActionArgs, LoaderArgs } from "@remix-run/server-runtime";
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+} from "@remix-run/server-runtime";
 import { redirect, json } from "@remix-run/server-runtime";
 import invariant from "tiny-invariant";
 import { getUser, updateUser } from "~/models/dashboard/User.server";
@@ -17,7 +20,7 @@ function getClassName(error: boolean) {
   return error ? className + errorClasses : className + normalClasses;
 }
 
-export async function action({ request, params }: ActionArgs) {
+export async function action({ request, params }: ActionFunctionArgs) {
   const id = params.id as string;
   await requireUserId(request);
   const formData = await request.formData();
@@ -43,7 +46,7 @@ export async function action({ request, params }: ActionArgs) {
   return redirect(`/dashboard/User`);
 }
 
-export async function loader({ params }: LoaderArgs) {
+export async function loader({ params }: LoaderFunctionArgs) {
   const id = params.id as string;
   const user = await getUser({ id });
   return {

@@ -1,5 +1,8 @@
 import { Link, useActionData, Form, useLoaderData } from "@remix-run/react";
-import type { ActionArgs, LoaderArgs } from "@remix-run/server-runtime";
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+} from "@remix-run/server-runtime";
 import { redirect, json } from "@remix-run/server-runtime";
 import invariant from "tiny-invariant";
 import {
@@ -11,11 +14,7 @@ import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
 import Dinero from "dinero.js";
 import { getUserListItems } from "~/models/dashboard/User.server";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
-import {
-  classNames,
-  extractAmount,
-  formatDate,
-} from "~/utils";
+import { classNames, extractAmount, formatDate } from "~/utils";
 import { useState } from "react";
 import { Switch } from "@headlessui/react";
 
@@ -30,7 +29,7 @@ function getClassName(error: boolean) {
   return error ? className + errorClasses : className + normalClasses;
 }
 
-export async function action({ request, params }: ActionArgs) {
+export async function action({ request, params }: ActionFunctionArgs) {
   const id = params.id as string;
   await requireUserId(request);
   const formData = await request.formData();
@@ -70,7 +69,7 @@ export async function action({ request, params }: ActionArgs) {
   return redirect(`/dashboard/Transaction`);
 }
 
-export async function loader({ params }: LoaderArgs) {
+export async function loader({ params }: LoaderFunctionArgs) {
   const id = params.id as string;
   const transaction = await getTransaction({ id });
   const users = await getUserListItems();
@@ -308,14 +307,14 @@ export default function UpdateTransaction() {
                   onChange={() => setIsPanini(!isPanini)}
                   className={classNames(
                     isPanini ? "bg-indigo-600" : "bg-gray-200",
-                    "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2",
                   )}
                 >
                   <span className="sr-only">Panini House</span>
                   <span
                     className={classNames(
                       isPanini ? "translate-x-5" : "translate-x-0",
-                      "pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                      "pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
                     )}
                   >
                     <span
@@ -323,7 +322,7 @@ export default function UpdateTransaction() {
                         isPanini
                           ? "opacity-0 duration-100 ease-out"
                           : "opacity-100 duration-200 ease-in",
-                        "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
+                        "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity",
                       )}
                       aria-hidden="true"
                     >
@@ -346,7 +345,7 @@ export default function UpdateTransaction() {
                         isPanini
                           ? "opacity-100 duration-200 ease-in"
                           : "opacity-0 duration-100 ease-out",
-                        "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
+                        "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity",
                       )}
                       aria-hidden="true"
                     >

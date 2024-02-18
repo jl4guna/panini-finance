@@ -1,5 +1,8 @@
 import { Link, useLoaderData } from "@remix-run/react";
-import type { LoaderArgs, ActionArgs } from "@remix-run/server-runtime";
+import type {
+  LoaderFunctionArgs,
+  ActionFunctionArgs,
+} from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
 import {
   deleteTransaction,
@@ -17,7 +20,7 @@ import { Listbox, Transition } from "@headlessui/react";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
 
-export async function action({ request }: ActionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
   await requireUserId(request);
   const formData = await request.formData();
   const { id } = Object.fromEntries(formData);
@@ -28,7 +31,7 @@ export async function action({ request }: ActionArgs) {
   return json({ id });
 }
 
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const searchParams = new URL(request.url).searchParams as any;
   const { filter } = Object.fromEntries(searchParams.entries());
 
@@ -103,7 +106,7 @@ export default function Transaction() {
                       className={({ active }) =>
                         classNames(
                           active ? "bg-indigo-600 text-white" : "text-gray-900",
-                          "relative cursor-default select-none py-2 pl-3 pr-9"
+                          "relative cursor-default select-none py-2 pl-3 pr-9",
                         )
                       }
                       value={null}
@@ -114,7 +117,7 @@ export default function Transaction() {
                             <span
                               className={classNames(
                                 selected ? "font-semibold" : "font-normal",
-                                "ml-3 block truncate"
+                                "ml-3 block truncate",
                               )}
                             >
                               Todas las categorias
@@ -132,7 +135,7 @@ export default function Transaction() {
                             active
                               ? "bg-indigo-600 text-white"
                               : "text-gray-900",
-                            "relative cursor-default select-none py-2 pl-3 pr-9"
+                            "relative cursor-default select-none py-2 pl-3 pr-9",
                           )
                         }
                         value={category}
@@ -150,7 +153,7 @@ export default function Transaction() {
                               <span
                                 className={classNames(
                                   selected ? "font-semibold" : "font-normal",
-                                  "ml-3 block truncate"
+                                  "ml-3 block truncate",
                                 )}
                               >
                                 {category.name}

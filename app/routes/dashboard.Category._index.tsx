@@ -1,5 +1,8 @@
 import { Link, useLoaderData } from "@remix-run/react";
-import type { LoaderArgs, ActionArgs } from "@remix-run/server-runtime";
+import type {
+  LoaderFunctionArgs,
+  ActionFunctionArgs,
+} from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
 import { useState } from "react";
 import invariant from "tiny-invariant";
@@ -7,10 +10,13 @@ import type { Alert } from "~/components/ConfirmAlert";
 import ConfirmAlert from "~/components/ConfirmAlert";
 import Icon from "~/components/Icon";
 import type { Category as CategoryType } from "~/models/dashboard/Category.server";
-import { deleteCategory,getCategoryListItems } from "~/models/dashboard/Category.server";
+import {
+  deleteCategory,
+  getCategoryListItems,
+} from "~/models/dashboard/Category.server";
 import { requireUserId } from "~/session.server";
 
-export async function action({ request }: ActionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
   await requireUserId(request);
   const formData = await request.formData();
   const { id } = Object.fromEntries(formData);
@@ -21,7 +27,7 @@ export async function action({ request }: ActionArgs) {
   return json({ id });
 }
 
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const categories = await getCategoryListItems();
 
   return json({ categories });

@@ -1,13 +1,13 @@
 import { SwatchIcon } from "@heroicons/react/20/solid";
 import { Link, useLoaderData } from "@remix-run/react";
-import type { LoaderArgs } from "@remix-run/server-runtime";
+import type { LoaderFunctionArgs } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
 import { formatInTimeZone } from "date-fns-tz";
 import type { Reminder as ReminderType } from "~/models/dashboard/Reminder.server";
 import { getReminderListItems } from "~/models/dashboard/Reminder.server";
 import { REMINDER_REPEAT_OPTIONS } from "~/utils/constants";
 
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const reminders = await getReminderListItems();
 
   return json({ reminders });

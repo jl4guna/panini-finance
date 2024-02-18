@@ -1,10 +1,10 @@
 import { Link, useLoaderData } from "@remix-run/react";
-import type { LoaderArgs } from "@remix-run/server-runtime";
+import type { LoaderFunctionArgs } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
 import type { User as UserType } from "~/models/dashboard/User.server";
 import { getUserListItems } from "~/models/dashboard/User.server";
 
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const users = await getUserListItems();
 
   return json({ users });

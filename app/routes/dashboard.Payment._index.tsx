@@ -1,5 +1,8 @@
 import { Link, useLoaderData } from "@remix-run/react";
-import type { LoaderArgs, ActionArgs } from "@remix-run/server-runtime";
+import type {
+  LoaderFunctionArgs,
+  ActionFunctionArgs,
+} from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
 import {
   deletePayment,
@@ -13,7 +16,7 @@ import { useState } from "react";
 import { requireUserId } from "~/session.server";
 import invariant from "tiny-invariant";
 
-export async function action({ request }: ActionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
   await requireUserId(request);
   const formData = await request.formData();
   const { id } = Object.fromEntries(formData);
@@ -24,7 +27,7 @@ export async function action({ request }: ActionArgs) {
   return json({ id });
 }
 
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const currentUserId = await requireUserId(request);
   const payments = await getPaymentListItems();
 
