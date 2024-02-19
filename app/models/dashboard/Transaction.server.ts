@@ -13,7 +13,7 @@ export function getTransaction({
   });
 }
 
-export function getTransactionListItems(filter?: string, search?: string, startDate?: Date, endDate?: Date) {
+export function getTransactionListItems(filter?: string, search?: string, startDate?: Date, endDate?: Date, personal?: boolean) {
 
   const whereFilter = filter ? { category: { name: filter } } : {};
 
@@ -38,6 +38,7 @@ export function getTransactionListItems(filter?: string, search?: string, startD
     },
     where: {
       AND: [
+        { personal: personal},
         whereFilter,
         whereSearch,
         startDate && endDate ? { date: { gte: startDate, lte: endDate } } : {},
@@ -49,6 +50,7 @@ export function getTransactionListItems(filter?: string, search?: string, startD
       amount: true,
       date: true,
       panini: true,
+      personal: true,
       user: {
         select: {
           id: true,
@@ -74,8 +76,9 @@ export function createTransaction({
   userId,
   categoryId,
   panini,
+  personal,
   notes,
-}: Pick<Transaction, "description" | "amount" | "date" | "userId" | "categoryId" | "panini" | "notes">) {
+}: Pick<Transaction, "description" | "amount" | "date" | "userId" | "categoryId" | "panini" | "notes" | "personal">) {
   let data = {
     description,
     amount,
@@ -83,6 +86,7 @@ export function createTransaction({
     userId,
     categoryId,
     panini,
+    personal,
     notes
   };
 
@@ -99,8 +103,9 @@ export function updateTransaction({
   userId,
   categoryId,
   panini,
+  personal,
   notes
-}: Pick<Transaction, "id" | "description" | "amount" | "date" | "userId" | "categoryId" | "panini" | "notes">) {
+}: Pick<Transaction, "id" | "description" | "amount" | "date" | "userId" | "categoryId" | "panini" | "notes" | "personal">) {
   let data = {
     description,
     amount,
@@ -108,6 +113,7 @@ export function updateTransaction({
     userId,
     categoryId,
     panini,
+    personal,
     notes
   };
 
@@ -127,7 +133,7 @@ export function deleteTransaction({
 
 export async function getUserTotalSpent(id: string){
   const sum = await prisma.transaction.aggregate({
-    where: { userId: id, panini: false },
+    where: { userId: id, panini: false, personal: false },
     _sum: { amount: true },
   });
 
@@ -136,7 +142,7 @@ export async function getUserTotalSpent(id: string){
 
 export async function getTotalSpent(){
   const sum = await prisma.transaction.aggregate({
-    where: { panini: false },
+    where: { panini: false, personal: false  },
     _sum: { amount: true },
   });
 
@@ -145,7 +151,7 @@ export async function getTotalSpent(){
 
 export async function getUserSpentOnPanini(id: string){
   const sum = await prisma.transaction.aggregate({
-    where: { userId: id, panini: true },
+    where: { userId: id, panini: true, personal: false  },
     _sum: { amount: true },
   });
 
@@ -154,7 +160,7 @@ export async function getUserSpentOnPanini(id: string){
 
 export async function getPaniniTotalSpent(){
   const sum = await prisma.transaction.aggregate({
-    where: { panini: true },
+    where: { panini: true, personal: false  },
     _sum: { amount: true },
   });
 
@@ -164,7 +170,7 @@ export async function getPaniniTotalSpent(){
 export async function getTotalSpentByCategory(startDate: Date, endDate: Date){
   const sum = await prisma.transaction.groupBy({
     by: ["categoryId"],
-    where: { date: { gte: startDate, lte: endDate } },
+    where: { date: { gte: startDate, lte: endDate }, personal: false },
     _sum: { amount: true },
   });
 

@@ -43,9 +43,11 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const searchParams = new URL(request.url).searchParams as any;
-  const { filter, search, start, end } = Object.fromEntries(
+  const { filter, search, start, end, personal } = Object.fromEntries(
     searchParams.entries(),
   );
+
+  const isPersonal = Boolean(personal);
 
   const startDate = start ? new Date(start) : new Date();
   if (!start) {
@@ -54,13 +56,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
   const endDate = end ? new Date(end) : new Date();
 
-  console.log(startDate, endDate);
-
   const transactions = await getTransactionListItems(
     filter,
     search,
     startDate,
     endDate,
+    isPersonal,
   );
   const categories = await getCategoryListItems();
 
@@ -75,26 +76,28 @@ export async function loader({ request }: LoaderFunctionArgs) {
       startDate: formatDate(startDate),
       endDate: formatDate(endDate),
     },
+    isPersonal,
   });
 }
 export default function Transaction() {
-  const { transactions, categories, category, search, range } =
+  const { transactions, categories, category, search, range, isPersonal } =
     useLoaderData<typeof loader>();
   const navigate = useNavigate();
 
   const [startDate, setStartDate] = useState(range.startDate);
   const [endDate, setEndDate] = useState(range.endDate);
   const [filter, setFilter] = useState(category?.name);
+  const [personal, setPersonal] = useState(isPersonal);
 
   useEffect(() => {
     if (isValidDate(startDate) && isValidDate(endDate)) {
       navigate(
         `/dashboard/Transaction?start=${startDate}&end=${endDate}${
           filter ? "&filter=" + filter : ""
-        }${search ? "&search=" + search : ""}`,
+        }${search ? "&search=" + search : ""}${personal ? "&personal=true" : ""}`,
       );
     }
-  }, [startDate, endDate, navigate, filter, search]);
+  }, [startDate, endDate, navigate, filter, search, personal]);
 
   const [openConfirm, setOpenConfirm] = useState<Alert>({
     open: false,
@@ -297,6 +300,37 @@ export default function Transaction() {
           </Listbox>
         </div>
 
+        <div>
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex" aria-label="Tabs">
+              <p
+                onClick={() => setPersonal(false)}
+                className={classNames(
+                  !isPersonal
+                    ? "border-indigo-500 text-indigo-600"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
+                  "w-1/2 border-b-2 py-4 px-1 text-center text-sm font-medium cursor-pointer",
+                )}
+                aria-current="page"
+              >
+                Gastos
+              </p>
+              <p
+                onClick={() => setPersonal(true)}
+                className={classNames(
+                  isPersonal
+                    ? "border-indigo-500 text-indigo-600"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
+                  "w-1/2 border-b-2 py-4 px-1 text-center text-sm font-medium cursor-pointer",
+                )}
+                aria-current="page"
+              >
+                Gastos Personales
+              </p>
+            </nav>
+          </div>
+        </div>
+
         <div className="mt-8 flow-root overflow-hidden">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <table className="w-full text-left">
@@ -322,18 +356,23 @@ export default function Transaction() {
                   >
                     Fecha
                   </th>
-                  <th
-                    scope="col"
-                    className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
-                  >
-                    Pagador
-                  </th>
-                  <th
-                    scope="col"
-                    className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
-                  >
-                    Panini House
-                  </th>
+                  {!personal && (
+                    <>
+                      <th
+                        scope="col"
+                        className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+                      >
+                        Pagador
+                      </th>
+                      <th
+                        scope="col"
+                        className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+                      >
+                        Casa
+                      </th>
+                    </>
+                  )}
+
                   <th
                     scope="col"
                     className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
@@ -366,12 +405,17 @@ export default function Transaction() {
                     <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
                       {formatDateToDisplay(transaction.date)}
                     </td>
-                    <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                      {transaction.user?.email}
-                    </td>
-                    <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                      {transaction.panini ? "Si" : "No"}
-                    </td>
+                    {!personal && (
+                      <>
+                        <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                          {transaction.user?.email}
+                        </td>
+                        <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                          {transaction.panini ? "Si" : "No"}
+                        </td>
+                      </>
+                    )}
+
                     <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
                       <div className="flex items-center justify-start gap-2">
                         <Icon
