@@ -11,15 +11,9 @@ import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
 
 import { getUserListItems } from "~/models/dashboard/User.server";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
-import {
-  classNames,
-  extractAmount,
-  formatDate,
-  generateFormRandomId,
-} from "~/utils";
+import { extractAmount, formatDate, generateFormRandomId } from "~/utils";
 import { useEffect, useState } from "react";
 import Dinero from "dinero.js";
-import { Switch } from "@headlessui/react";
 
 function getClassName(error: boolean) {
   const errorClasses =
@@ -35,16 +29,8 @@ function getClassName(error: boolean) {
 export async function action({ request }: ActionFunctionArgs) {
   await requireUserId(request);
   const formData = await request.formData();
-  const {
-    description,
-    amount,
-    date,
-    userId,
-    categoryId,
-    action,
-    panini,
-    notes,
-  } = Object.fromEntries(formData);
+  const { description, amount, date, userId, categoryId, action, type, notes } =
+    Object.fromEntries(formData);
 
   const errors = {
     description: description ? null : "Description is required",
@@ -72,7 +58,8 @@ export async function action({ request }: ActionFunctionArgs) {
     date: new Date(date),
     userId,
     categoryId,
-    panini: panini === "true",
+    panini: type === "casa",
+    personal: type === "personal",
     notes,
   });
 
@@ -101,7 +88,6 @@ export default function CreateTransaction() {
   const { formRandomId, currentUserId, users, categories } =
     useLoaderData<typeof loader>();
   const errors = useActionData<typeof action>();
-  const [isPanini, setIsPanini] = useState(false);
 
   const [amount, setAmount] = useState("");
 
@@ -117,7 +103,6 @@ export default function CreateTransaction() {
 
   useEffect(() => {
     setAmount("");
-    setIsPanini(false);
   }, [formRandomId]);
 
   return (
@@ -238,7 +223,7 @@ export default function CreateTransaction() {
                 htmlFor="userId"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
-                Pagante
+                Pagador
               </label>
               <div className="relative mt-2">
                 <select
@@ -313,76 +298,62 @@ export default function CreateTransaction() {
             </div>
             <div className="sm:col-span-3">
               <label
-                htmlFor="panini"
+                htmlFor="type"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Panini House
               </label>
-              <input
-                type="hidden"
-                name="panini"
-                id="panini"
-                value={`${isPanini}`}
-              />
-              <div className="relative mt-2">
-                <Switch
-                  checked={isPanini}
-                  onChange={() => setIsPanini(!isPanini)}
-                  className={classNames(
-                    isPanini ? "bg-indigo-600" : "bg-gray-200",
-                    "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2",
-                  )}
-                >
-                  <span className="sr-only">Panini House</span>
-                  <span
-                    className={classNames(
-                      isPanini ? "translate-x-5" : "translate-x-0",
-                      "pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                    )}
-                  >
-                    <span
-                      className={classNames(
-                        isPanini
-                          ? "opacity-0 duration-100 ease-out"
-                          : "opacity-100 duration-200 ease-in",
-                        "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity",
-                      )}
-                      aria-hidden="true"
+              <fieldset className="mt-4">
+                <legend className="sr-only">Tipo de gasto</legend>
+                <div className="space-y-4 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
+                  <div className="flex items-center">
+                    <input
+                      id="panini"
+                      name="type"
+                      type="radio"
+                      value="panini"
+                      defaultChecked
+                      className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                    />
+                    <label
+                      htmlFor="panini"
+                      className="ml-3 block text-sm font-medium leading-6 text-gray-900"
                     >
-                      <svg
-                        className="h-3 w-3 text-gray-400"
-                        fill="none"
-                        viewBox="0 0 12 12"
-                      >
-                        <path
-                          d="M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className={classNames(
-                        isPanini
-                          ? "opacity-100 duration-200 ease-in"
-                          : "opacity-0 duration-100 ease-out",
-                        "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity",
-                      )}
-                      aria-hidden="true"
+                      Panini
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      id="casa"
+                      name="type"
+                      value="casa"
+                      type="radio"
+                      className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                    />
+                    <label
+                      htmlFor="casa"
+                      className="ml-3 block text-sm font-medium leading-6 text-gray-900"
                     >
-                      <svg
-                        className="text-blue-1 h-3 w-3"
-                        fill="currentColor"
-                        viewBox="0 0 12 12"
-                      >
-                        <path d="M3.707 5.293a1 1 0 00-1.414 1.414l1.414-1.414zM5 8l-.707.707a1 1 0 001.414 0L5 8zm4.707-3.293a1 1 0 00-1.414-1.414l1.414 1.414zm-7.414 2l2 2 1.414-1.414-2-2-1.414 1.414zm3.414 2l4-4-1.414-1.414-4 4 1.414 1.414z" />
-                      </svg>
-                    </span>
-                  </span>
-                </Switch>
-              </div>
+                      Casa
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      id="personal"
+                      name="type"
+                      value="personal"
+                      type="radio"
+                      className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                    />
+                    <label
+                      htmlFor="personal"
+                      className="ml-3 block text-sm font-medium leading-6 text-gray-900"
+                    >
+                      Personal
+                    </label>
+                  </div>
+                </div>
+              </fieldset>
             </div>
             <div className="sm:col-span-6">
               <label
@@ -418,7 +389,7 @@ export default function CreateTransaction() {
             value="create"
             className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
-            Registar Gasto
+            Registrar Gasto
           </button>
           <button
             type="submit"
@@ -426,7 +397,7 @@ export default function CreateTransaction() {
             value="createAndAddAnother"
             className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
-            Registar y Agregar otro
+            Registrar y Agregar otro
           </button>
         </div>
       </Form>

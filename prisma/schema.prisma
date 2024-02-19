@@ -58,6 +58,7 @@ model Transaction {
   amount      Float
   date        DateTime
   panini      Boolean  @default(false)
+  personal    Boolean  @default(false)
   notes       String   @default("")
 
   createdAt DateTime @default(now())
