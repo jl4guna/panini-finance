@@ -10,6 +10,7 @@ import {
   TagIcon,
   XMarkIcon,
   CalendarDaysIcon,
+  BanknotesIcon,
 } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
@@ -31,6 +32,12 @@ const navigation = [
     name: "Gastos",
     href: "/dashboard/Transaction",
     icon: ShoppingBagIcon,
+    current: false,
+  },
+  {
+    name: "Gastos a Meses",
+    href: "/dashboard/Installments",
+    icon: BanknotesIcon,
     current: false,
   },
   {
@@ -146,8 +153,8 @@ export default function Dashboard() {
                                       isPending
                                         ? "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
                                         : isActive
-                                        ? "bg-gray-50 text-indigo-600"
-                                        : "",
+                                          ? "bg-gray-50 text-indigo-600"
+                                          : "",
                                       "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
                                     )
                                   }
@@ -206,8 +213,8 @@ export default function Dashboard() {
                               isPending
                                 ? "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
                                 : isActive
-                                ? "bg-gray-50 text-indigo-600"
-                                : "",
+                                  ? "bg-gray-50 text-indigo-600"
+                                  : "",
                               "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
                             )
                           }
@@ -334,8 +341,8 @@ export default function Dashboard() {
                     isPending
                       ? "text-gray-700 hover:text-indigo-600"
                       : isActive
-                      ? "text-indigo-600"
-                      : "",
+                        ? "text-indigo-600"
+                        : "",
                     "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
                   )
                 }
@@ -350,8 +357,8 @@ export default function Dashboard() {
                     isPending
                       ? "text-gray-700 hover:text-indigo-600"
                       : isActive
-                      ? "text-indigo-600"
-                      : "",
+                        ? "text-indigo-600"
+                        : "",
                     "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
                   )
                 }
@@ -366,8 +373,8 @@ export default function Dashboard() {
                     isPending
                       ? "text-gray-700 hover:text-indigo-600"
                       : isActive
-                      ? "text-indigo-600"
-                      : "",
+                        ? "text-indigo-600"
+                        : "",
                     "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
                   )
                 }
@@ -382,8 +389,8 @@ export default function Dashboard() {
                     isPending
                       ? "text-gray-700 hover:text-indigo-600"
                       : isActive
-                      ? "text-indigo-600"
-                      : "",
+                        ? "text-indigo-600"
+                        : "",
                     "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
                   )
                 }
@@ -398,8 +405,8 @@ export default function Dashboard() {
                     isPending
                       ? "text-gray-700 hover:text-indigo-600"
                       : isActive
-                      ? "text-indigo-600"
-                      : "",
+                        ? "text-indigo-600"
+                        : "",
                     "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
                   )
                 }

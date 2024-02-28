@@ -19,7 +19,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const { balance, paniniBalance, status, paniniStatus } = await getUserBalance(
     user.id,
   );
-
   const categories = await getCategoryListItems();
   const startDate = start ? new Date(start) : new Date();
   if (!start) {
