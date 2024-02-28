@@ -1,21 +1,24 @@
 import type { Transaction } from "@prisma/client";
 
 import { prisma } from "~/db.server";
-import { extractAmount } from '~/utils';
-import Dinero from 'dinero.js';
+import { extractAmount } from "~/utils";
+import Dinero from "dinero.js";
 
 export type { Transaction } from "@prisma/client";
 
-export function getTransaction({
-  id,
-}: Pick<Transaction, "id">) {
+export function getTransaction({ id }: Pick<Transaction, "id">) {
   return prisma.transaction.findFirst({
     where: { id },
   });
 }
 
-export function getTransactionListItems(filter?: string, search?: string, startDate?: Date, endDate?: Date, personal?: boolean) {
-
+export function getTransactionListItems(
+  filter?: string,
+  search?: string,
+  startDate?: Date,
+  endDate?: Date,
+  personal?: boolean,
+) {
   const whereFilter = filter ? { category: { name: filter } } : {};
 
   // If search is not empty and it is not parseable to float, we want to search for the description
@@ -26,7 +29,10 @@ export function getTransactionListItems(filter?: string, search?: string, startD
     amount?: {
       equals: number;
     };
-  } = search && isNaN(parseFloat(search)) ? { description: { contains: search } } : {};
+  } =
+    search && isNaN(parseFloat(search))
+      ? { description: { contains: search } }
+      : {};
   // If search is not empty and it is parseable to float, we want to search for the amount
   if (search && !isNaN(parseFloat(search))) {
     const amount = extractAmount(search);
@@ -39,7 +45,7 @@ export function getTransactionListItems(filter?: string, search?: string, startD
     },
     where: {
       AND: [
-        { personal: personal, installments: 1},
+        { personal: personal, installments: 1 },
         whereFilter,
         whereSearch,
         startDate && endDate ? { date: { gte: startDate, lte: endDate } } : {},
@@ -70,8 +76,13 @@ export function getTransactionListItems(filter?: string, search?: string, startD
   });
 }
 
-export function getInstallmentTransactionListItems(filter?: string, search?: string, startDate?: Date, endDate?: Date, personal?: boolean) {
-
+export function getInstallmentTransactionListItems(
+  filter?: string,
+  search?: string,
+  startDate?: Date,
+  endDate?: Date,
+  personal?: boolean,
+) {
   const whereFilter = filter ? { category: { name: filter } } : {};
 
   let whereSearch: {
@@ -81,7 +92,10 @@ export function getInstallmentTransactionListItems(filter?: string, search?: str
     amount?: {
       equals: number;
     };
-  } = search && isNaN(parseFloat(search)) ? { description: { contains: search } } : {};
+  } =
+    search && isNaN(parseFloat(search))
+      ? { description: { contains: search } }
+      : {};
   if (search && !isNaN(parseFloat(search))) {
     const amount = extractAmount(search);
     whereSearch = { amount: { equals: amount } };
@@ -93,7 +107,7 @@ export function getInstallmentTransactionListItems(filter?: string, search?: str
     },
     where: {
       AND: [
-        { personal: personal, installments: { gt: 1 }},
+        { personal: personal, installments: { gt: 1 } },
         whereFilter,
         whereSearch,
         startDate && endDate ? { date: { gte: startDate, lte: endDate } } : {},
@@ -135,8 +149,19 @@ export function createTransaction({
   panini,
   personal,
   notes,
-  installments
-}: Pick<Transaction, "description" | "amount" | "date" | "userId" | "categoryId" | "panini" | "notes" | "personal" | "installments">) {
+  installments,
+}: Pick<
+  Transaction,
+  | "description"
+  | "amount"
+  | "date"
+  | "userId"
+  | "categoryId"
+  | "panini"
+  | "notes"
+  | "personal"
+  | "installments"
+>) {
   let data = {
     description,
     amount,
@@ -146,7 +171,7 @@ export function createTransaction({
     panini,
     personal,
     notes,
-    installments
+    installments,
   };
 
   return prisma.transaction.create({
@@ -164,8 +189,20 @@ export function updateTransaction({
   panini,
   personal,
   notes,
-  installments
-}: Pick<Transaction, "id" | "description" | "amount" | "date" | "userId" | "categoryId" | "panini" | "notes" | "personal" | "installments">) {
+  installments,
+}: Pick<
+  Transaction,
+  | "id"
+  | "description"
+  | "amount"
+  | "date"
+  | "userId"
+  | "categoryId"
+  | "panini"
+  | "notes"
+  | "personal"
+  | "installments"
+>) {
   let data = {
     description,
     amount,
@@ -175,7 +212,7 @@ export function updateTransaction({
     panini,
     personal,
     notes,
-    installments
+    installments,
   };
 
   return prisma.transaction.updateMany({
@@ -184,76 +221,96 @@ export function updateTransaction({
   });
 }
 
-export function deleteTransaction({
-  id,
-}: Pick<Transaction, "id">) {
+export function deleteTransaction({ id }: Pick<Transaction, "id">) {
   return prisma.transaction.deleteMany({
     where: { id },
   });
 }
 
-export async function getUserTotalSpent(id: string){
+export async function getUserTotalSpent(id: string) {
   const sum = await prisma.transaction.aggregate({
-    where: { userId: id, panini: false, personal: false, installments: 1},
+    where: { userId: id, panini: false, personal: false, installments: 1 },
     _sum: { amount: true },
   });
 
   return sum._sum.amount || 0;
 }
 
-export async function getTotalSpent(){
+export async function getTotalSpent() {
   const sum = await prisma.transaction.aggregate({
-    where: { panini: false, personal: false, installments: 1},
+    where: { panini: false, personal: false, installments: 1 },
     _sum: { amount: true },
   });
 
   return sum._sum.amount || 0;
 }
 
-export async function getUserSpentOnPanini(id: string){
+export async function getUserSpentOnPanini(id: string) {
   const sum = await prisma.transaction.aggregate({
-    where: { userId: id, panini: true, personal: false, installments: 1},
+    where: { userId: id, panini: true, personal: false, installments: 1 },
     _sum: { amount: true },
   });
 
   return sum._sum.amount || 0;
 }
 
-export async function getPaniniTotalSpent(){
+export async function getPaniniTotalSpent() {
   const sum = await prisma.transaction.aggregate({
-    where: { panini: true, personal: false, installments: 1},
+    where: { panini: true, personal: false, installments: 1 },
     _sum: { amount: true },
   });
 
   return sum._sum.amount || 0;
 }
 
-export async function getTotalSpentByCategory(startDate: Date, endDate: Date){
+export async function getTotalSpentByCategory(startDate: Date, endDate: Date) {
   const sum = await prisma.transaction.groupBy({
     by: ["categoryId"],
-    where: { date: { gte: startDate, lte: endDate }, personal: false, installments: 1},
+    where: {
+      date: { gte: startDate, lte: endDate },
+      personal: false,
+      installments: 1,
+    },
     _sum: { amount: true },
   });
 
   return sum;
 }
 
-export async function getInstallmentsTotal(){
-    const installments = await prisma.transaction.findMany({
-    where: { personal: false, panini: false, installments: { gt: 1 }},
+export async function getInstallmentsTotal() {
+  const installments = await prisma.transaction.findMany({
+    where: { personal: false, panini: false, installments: { gt: 1 } },
   });
 
-  const unPaidInstallments = installments.filter((installment) => installment.paid < installment.installments);
-  return unPaidInstallments.reduce((acc, installment) => acc + Dinero({amount: installment.amount}).divide(installment.installments).getAmount(), 0);
-
+  const unPaidInstallments = installments.filter(
+    (installment) => installment.paid < installment.installments,
+  );
+  return unPaidInstallments.reduce(
+    (acc, installment) =>
+      acc +
+      Dinero({ amount: installment.amount })
+        .divide(installment.installments)
+        .multiply(installment.paid + 1)
+        .getAmount(),
+    0,
+  );
 }
 
-export async function getUserInstallments(userId: string){
+export async function getUserInstallments(userId: string) {
   const installments = await prisma.transaction.findMany({
-    where: { userId, personal: false, panini: false, installments: { gt: 1 }},
+    where: { userId, personal: false, panini: false, installments: { gt: 1 } },
   });
 
-  const unPaidInstallments = installments.filter((installment) => installment.paid < installment.installments);
-  return unPaidInstallments.reduce((acc, installment) => acc + Dinero({amount: installment.amount}).divide(installment.installments).getAmount(), 0);
-
+  const unPaidInstallments = installments.filter(
+    (installment) => installment.paid < installment.installments,
+  );
+  return unPaidInstallments.reduce(
+    (acc, installment) =>
+      acc +
+      Dinero({ amount: installment.amount })
+        .divide(installment.installments)
+        .multiply(installment.paid + 1)
+        .getAmount(),
+    0,
+  );
 }
