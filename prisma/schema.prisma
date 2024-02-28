@@ -53,13 +53,15 @@ model Category {
 }
 
 model Transaction {
-  id          String   @id @default(cuid())
-  description String
-  amount      Float
-  date        DateTime
-  panini      Boolean  @default(false)
-  personal    Boolean  @default(false)
-  notes       String   @default("")
+  id           String   @id @default(cuid())
+  description  String
+  amount       Float
+  date         DateTime
+  panini       Boolean  @default(false)
+  personal     Boolean  @default(false)
+  notes        String   @default("")
+  installments Int      @default(1)
+  paid         Int      @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

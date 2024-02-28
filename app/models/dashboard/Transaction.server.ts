@@ -2,6 +2,7 @@ import type { Transaction } from "@prisma/client";
 
 import { prisma } from "~/db.server";
 import { extractAmount } from '~/utils';
+import Dinero from 'dinero.js';
 
 export type { Transaction } from "@prisma/client";
 
@@ -38,7 +39,7 @@ export function getTransactionListItems(filter?: string, search?: string, startD
     },
     where: {
       AND: [
-        { personal: personal},
+        { personal: personal, installments: 1},
         whereFilter,
         whereSearch,
         startDate && endDate ? { date: { gte: startDate, lte: endDate } } : {},
@@ -69,6 +70,62 @@ export function getTransactionListItems(filter?: string, search?: string, startD
   });
 }
 
+export function getInstallmentTransactionListItems(filter?: string, search?: string, startDate?: Date, endDate?: Date, personal?: boolean) {
+
+  const whereFilter = filter ? { category: { name: filter } } : {};
+
+  let whereSearch: {
+    description?: {
+      contains: string;
+    };
+    amount?: {
+      equals: number;
+    };
+  } = search && isNaN(parseFloat(search)) ? { description: { contains: search } } : {};
+  if (search && !isNaN(parseFloat(search))) {
+    const amount = extractAmount(search);
+    whereSearch = { amount: { equals: amount } };
+  }
+
+  return prisma.transaction.findMany({
+    orderBy: {
+      date: "desc",
+    },
+    where: {
+      AND: [
+        { personal: personal, installments: { gt: 1 }},
+        whereFilter,
+        whereSearch,
+        startDate && endDate ? { date: { gte: startDate, lte: endDate } } : {},
+      ],
+    },
+    select: {
+      id: true,
+      description: true,
+      amount: true,
+      date: true,
+      panini: true,
+      personal: true,
+      installments: true,
+      paid: true,
+      user: {
+        select: {
+          id: true,
+          email: true,
+        },
+      },
+      category: {
+        select: {
+          id: true,
+          name: true,
+          icon: true,
+          color: true,
+        },
+      },
+    },
+  });
+}
+
 export function createTransaction({
   description,
   amount,
@@ -78,7 +135,8 @@ export function createTransaction({
   panini,
   personal,
   notes,
-}: Pick<Transaction, "description" | "amount" | "date" | "userId" | "categoryId" | "panini" | "notes" | "personal">) {
+  installments
+}: Pick<Transaction, "description" | "amount" | "date" | "userId" | "categoryId" | "panini" | "notes" | "personal" | "installments">) {
   let data = {
     description,
     amount,
@@ -87,7 +145,8 @@ export function createTransaction({
     categoryId,
     panini,
     personal,
-    notes
+    notes,
+    installments
   };
 
   return prisma.transaction.create({
@@ -104,8 +163,9 @@ export function updateTransaction({
   categoryId,
   panini,
   personal,
-  notes
-}: Pick<Transaction, "id" | "description" | "amount" | "date" | "userId" | "categoryId" | "panini" | "notes" | "personal">) {
+  notes,
+  installments
+}: Pick<Transaction, "id" | "description" | "amount" | "date" | "userId" | "categoryId" | "panini" | "notes" | "personal" | "installments">) {
   let data = {
     description,
     amount,
@@ -114,7 +174,8 @@ export function updateTransaction({
     categoryId,
     panini,
     personal,
-    notes
+    notes,
+    installments
   };
 
   return prisma.transaction.updateMany({
@@ -133,7 +194,7 @@ export function deleteTransaction({
 
 export async function getUserTotalSpent(id: string){
   const sum = await prisma.transaction.aggregate({
-    where: { userId: id, panini: false, personal: false },
+    where: { userId: id, panini: false, personal: false, installments: 1},
     _sum: { amount: true },
   });
 
@@ -142,7 +203,7 @@ export async function getUserTotalSpent(id: string){
 
 export async function getTotalSpent(){
   const sum = await prisma.transaction.aggregate({
-    where: { panini: false, personal: false  },
+    where: { panini: false, personal: false, installments: 1},
     _sum: { amount: true },
   });
 
@@ -151,7 +212,7 @@ export async function getTotalSpent(){
 
 export async function getUserSpentOnPanini(id: string){
   const sum = await prisma.transaction.aggregate({
-    where: { userId: id, panini: true, personal: false  },
+    where: { userId: id, panini: true, personal: false, installments: 1},
     _sum: { amount: true },
   });
 
@@ -160,7 +221,7 @@ export async function getUserSpentOnPanini(id: string){
 
 export async function getPaniniTotalSpent(){
   const sum = await prisma.transaction.aggregate({
-    where: { panini: true, personal: false  },
+    where: { panini: true, personal: false, installments: 1},
     _sum: { amount: true },
   });
 
@@ -170,9 +231,29 @@ export async function getPaniniTotalSpent(){
 export async function getTotalSpentByCategory(startDate: Date, endDate: Date){
   const sum = await prisma.transaction.groupBy({
     by: ["categoryId"],
-    where: { date: { gte: startDate, lte: endDate }, personal: false },
+    where: { date: { gte: startDate, lte: endDate }, personal: false, installments: 1},
     _sum: { amount: true },
   });
 
   return sum;
+}
+
+export async function getInstallmentsTotal(){
+    const installments = await prisma.transaction.findMany({
+    where: { personal: false, panini: false, installments: { gt: 1 }},
+  });
+
+  const unPaidInstallments = installments.filter((installment) => installment.paid < installment.installments);
+  return unPaidInstallments.reduce((acc, installment) => acc + Dinero({amount: installment.amount}).divide(installment.installments).getAmount(), 0);
+
+}
+
+export async function getUserInstallments(userId: string){
+  const installments = await prisma.transaction.findMany({
+    where: { userId, personal: false, panini: false, installments: { gt: 1 }},
+  });
+
+  const unPaidInstallments = installments.filter((installment) => installment.paid < installment.installments);
+  return unPaidInstallments.reduce((acc, installment) => acc + Dinero({amount: installment.amount}).divide(installment.installments).getAmount(), 0);
+
 }

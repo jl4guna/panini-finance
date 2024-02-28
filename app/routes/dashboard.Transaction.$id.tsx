@@ -14,8 +14,9 @@ import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
 import Dinero from "dinero.js";
 import { getUserListItems } from "~/models/dashboard/User.server";
 import { getCategoryListItems } from "~/models/dashboard/Category.server";
-import { extractAmount, formatDate } from "~/utils";
+import { classNames, extractAmount, formatDate } from "~/utils";
 import { useState } from "react";
+import { Switch } from "@headlessui/react";
 
 function getClassName(error: boolean) {
   const errorClasses =
@@ -32,8 +33,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const id = params.id as string;
   await requireUserId(request);
   const formData = await request.formData();
-  const { description, amount, date, userId, categoryId, type, notes } =
-    Object.fromEntries(formData);
+  const {
+    description,
+    amount,
+    date,
+    userId,
+    categoryId,
+    type,
+    notes,
+    installments,
+  } = Object.fromEntries(formData);
 
   const errors = {
     description: description ? null : "Description is required",
@@ -53,6 +62,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
   invariant(typeof userId === "string", "Invalid userId");
   invariant(typeof categoryId === "string", "Invalid categoryId");
   invariant(typeof notes === "string", "Invalid notes");
+  invariant(typeof type === "string", "Invalid type");
+
+  const numberOfInstallments = isNaN(parseInt(installments as string))
+    ? 1
+    : parseInt(installments as string);
 
   await updateTransaction({
     id,
@@ -64,7 +78,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
     panini: type === "casa",
     personal: type === "personal",
     notes,
+    installments: numberOfInstallments,
   });
+
+  if (numberOfInstallments > 1) {
+    return redirect(`/dashboard/Installments`);
+  }
 
   return redirect(`/dashboard/Transaction`);
 }
@@ -89,6 +108,10 @@ export default function UpdateTransaction() {
     amount: transaction?.amount || 0,
   }).toFormat("0,0.00");
   const [amount, setAmount] = useState(initialAmount);
+  const [installments, setInstallments] = useState(
+    transaction?.installments || 1,
+  );
+  const [isMSI, setIsMSI] = useState(installments > 1);
 
   function handleOnChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { value } = event.target;
@@ -292,7 +315,7 @@ export default function UpdateTransaction() {
                 htmlFor="type"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
-                Panini House
+                Tipo de gasto
               </label>
               <fieldset className="mt-4">
                 <legend className="sr-only">Tipo de gasto</legend>
@@ -350,6 +373,106 @@ export default function UpdateTransaction() {
                 </div>
               </fieldset>
             </div>
+            <div className="sm:col-span-3">
+              <label
+                htmlFor="installments"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Meses sin intereses
+              </label>
+              <div className="relative mt-2">
+                <Switch
+                  checked={isMSI}
+                  onChange={() => {
+                    if (isMSI) {
+                      setInstallments(1);
+                      setIsMSI(false);
+                    } else {
+                      setIsMSI(true);
+                    }
+                  }}
+                  className={classNames(
+                    isMSI ? "bg-indigo-600" : "bg-gray-200",
+                    "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2",
+                  )}
+                >
+                  <span className="sr-only">Meses sin intereses</span>
+                  <span
+                    className={classNames(
+                      isMSI ? "translate-x-5" : "translate-x-0",
+                      "pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                    )}
+                  >
+                    <span
+                      className={classNames(
+                        isMSI
+                          ? "opacity-0 duration-100 ease-out"
+                          : "opacity-100 duration-200 ease-in",
+                        "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity",
+                      )}
+                      aria-hidden="true"
+                    >
+                      <svg
+                        className="h-3 w-3 text-gray-400"
+                        fill="none"
+                        viewBox="0 0 12 12"
+                      >
+                        <path
+                          d="M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    <span
+                      className={classNames(
+                        isMSI
+                          ? "opacity-100 duration-200 ease-in"
+                          : "opacity-0 duration-100 ease-out",
+                        "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity",
+                      )}
+                      aria-hidden="true"
+                    >
+                      <svg
+                        className="text-blue-1 h-3 w-3"
+                        fill="currentColor"
+                        viewBox="0 0 12 12"
+                      >
+                        <path d="M3.707 5.293a1 1 0 00-1.414 1.414l1.414-1.414zM5 8l-.707.707a1 1 0 001.414 0L5 8zm4.707-3.293a1 1 0 00-1.414-1.414l1.414 1.414zm-7.414 2l2 2 1.414-1.414-2-2-1.414 1.414zm3.414 2l4-4-1.414-1.414-4 4 1.414 1.414z" />
+                      </svg>
+                    </span>
+                  </span>
+                </Switch>
+              </div>
+              {isMSI && (
+                <div className="flex items-center gap-2">
+                  <label htmlFor="installments" className="sr-only">
+                    Meses sin intereses
+                  </label>
+                  <input
+                    type="number"
+                    name="installments"
+                    id="installments"
+                    value={installments}
+                    onChange={(event) =>
+                      setInstallments(parseInt(event.target.value, 10))
+                    }
+                    min={1}
+                    max={72}
+                    className="block w-fit rounded-md border-0 py-1.5 px-2 sm:text-sm sm:leading-6 focus:ring-inset ring-1 focus:ring-2 ring-inset"
+                    placeholder="1"
+                  />
+                  <span>
+                    x{" "}
+                    {Dinero({ amount: extractAmount(amount) })
+                      .divide(installments)
+                      .toFormat("$0,0.00")}
+                  </span>
+                </div>
+              )}
+            </div>
             <div className="sm:col-span-6">
               <label
                 htmlFor="notes"
@@ -370,7 +493,13 @@ export default function UpdateTransaction() {
           </div>
         </div>
         <div className="mt-6 flex items-center justify-end gap-x-6">
-          <Link to="/dashboard/Transaction">
+          <Link
+            to={
+              installments > 1
+                ? "/dashboard/Installments"
+                : "/dashboard/Transaction"
+            }
+          >
             <button
               type="button"
               className="text-sm font-semibold leading-6 text-gray-900"
