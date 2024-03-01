@@ -8,13 +8,7 @@ import {
   deleteTransaction,
   getInstallmentTransactionListItems,
 } from "~/models/dashboard/Transaction.server";
-import {
-  classNames,
-  formatDate,
-  formatDateToDisplay,
-  generateFormRandomId,
-  isValidDate,
-} from "~/utils";
+import { classNames, formatDateToDisplay, generateFormRandomId } from "~/utils";
 import Dinero from "dinero.js";
 import Icon from "~/components/Icon";
 import type { Alert } from "~/components/ConfirmAlert";
@@ -42,26 +36,19 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  const userId = await requireUserId(request);
   const searchParams = new URL(request.url).searchParams as any;
-  const { filter, search, start, end, personal } = Object.fromEntries(
+  const { filter, search, personal } = Object.fromEntries(
     searchParams.entries(),
   );
 
   const isPersonal = Boolean(personal);
 
-  const startDate = start ? new Date(start) : new Date();
-  if (!start) {
-    //Get the first day of the month
-    startDate.setDate(0);
-  }
-  const endDate = end ? new Date(end) : new Date();
-
   const transactions = await getInstallmentTransactionListItems(
     filter,
     search,
-    startDate,
-    endDate,
     isPersonal,
+    userId,
   );
   const categories = await getCategoryListItems();
 
@@ -72,32 +59,23 @@ export async function loader({ request }: LoaderFunctionArgs) {
     categories,
     category,
     search,
-    range: {
-      startDate: formatDate(startDate),
-      endDate: formatDate(endDate),
-    },
     isPersonal,
   });
 }
 export default function Transaction() {
-  const { transactions, categories, category, search, range, isPersonal } =
+  const { transactions, categories, category, search, isPersonal } =
     useLoaderData<typeof loader>();
   const navigate = useNavigate();
-
-  const [startDate, setStartDate] = useState(range.startDate);
-  const [endDate, setEndDate] = useState(range.endDate);
   const [filter, setFilter] = useState(category?.name);
   const [personal, setPersonal] = useState(isPersonal);
 
   useEffect(() => {
-    if (isValidDate(startDate) && isValidDate(endDate)) {
-      navigate(
-        `/dashboard/Installments?start=${startDate}&end=${endDate}${
-          filter ? "&filter=" + filter : ""
-        }${search ? "&search=" + search : ""}${personal ? "&personal=true" : ""}`,
-      );
-    }
-  }, [startDate, endDate, navigate, filter, search, personal]);
+    navigate(
+      `/dashboard/Installments?${
+        filter ? "&filter=" + filter : ""
+      }${search ? "&search=" + search : ""}${personal ? "&personal=true" : ""}`,
+    );
+  }, [navigate, filter, search, personal]);
 
   const [openConfirm, setOpenConfirm] = useState<Alert>({
     open: false,
@@ -146,58 +124,6 @@ export default function Transaction() {
                 Registrar Gasto
               </button>
             </Link>
-          </div>
-        </div>
-        <div className=" pb-2">
-          <div className="mt-4 sm:mt-10 sm:grid flex justify-between gap-x-6 gap-y-8 sm:grid-cols-6">
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="date"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Desde
-              </label>
-              <div className="relative mt-2">
-                <input
-                  type="date"
-                  id="date"
-                  name="date"
-                  defaultValue={startDate}
-                  className="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  required={true}
-                  onChange={(e) => {
-                    const date = e.target.value;
-                    if (isValidDate(date)) {
-                      setStartDate(formatDate(date));
-                    }
-                  }}
-                />
-              </div>
-            </div>
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="date"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Hasta
-              </label>
-              <div className="relative mt-2">
-                <input
-                  type="date"
-                  id="date"
-                  name="date"
-                  defaultValue={endDate}
-                  className="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  required={true}
-                  onChange={(e) => {
-                    const date = e.target.value;
-                    if (isValidDate(date)) {
-                      setEndDate(formatDate(new Date(date)));
-                    }
-                  }}
-                />
-              </div>
-            </div>
           </div>
         </div>
         <div key={generateFormRandomId()} className="mt-4 w-full md:w-1/3">
