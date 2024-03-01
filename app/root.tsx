@@ -8,6 +8,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "@remix-run/react";
 
 import { getUser } from "~/session.server";
@@ -20,10 +21,27 @@ export const links: LinksFunction = () => [
 ];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  return json({ user: await getUser(request) });
+  return json({
+    user: await getUser(request),
+    ENV: process.env.ENVIRONMENT,
+  });
 };
 
+function getEnvironmentBackgroundColor(ENV?: string) {
+  if (ENV === "production") {
+    return "bg-white";
+  }
+
+  if (ENV === "staging") {
+    return "bg-yellow-100";
+  }
+
+  return "bg-red-100";
+}
+
 export default function App() {
+  const { ENV } = useLoaderData<typeof loader>();
+
   return (
     <html lang="en" className="h-full">
       <head>
@@ -33,7 +51,7 @@ export default function App() {
         <link rel="manifest" href="/manifest.webmanifest" />
         <Links />
       </head>
-      <body className="h-full">
+      <body className={"h-full " + getEnvironmentBackgroundColor(ENV)}>
         <Outlet />
         <ScrollRestoration />
         <Scripts />

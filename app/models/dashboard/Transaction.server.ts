@@ -44,7 +44,6 @@ export function getTransactionListItems(
     ? { personal: true, userId }
     : { personal: false };
 
-  console.log("wherePersonal", wherePersonal);
   return prisma.transaction.findMany({
     orderBy: {
       date: "desc",
@@ -86,9 +85,8 @@ export function getTransactionListItems(
 export function getInstallmentTransactionListItems(
   filter?: string,
   search?: string,
-  startDate?: Date,
-  endDate?: Date,
   personal?: boolean,
+  userId?: string,
 ) {
   const whereFilter = filter ? { category: { name: filter } } : {};
 
@@ -108,16 +106,20 @@ export function getInstallmentTransactionListItems(
     whereSearch = { amount: { equals: amount } };
   }
 
+  const wherePersonal = personal
+    ? { personal: true, userId }
+    : { personal: false };
+
   return prisma.transaction.findMany({
     orderBy: {
       date: "desc",
     },
     where: {
       AND: [
-        { personal: personal, installments: { gt: 1 } },
+        { installments: { gt: 1 } },
+        wherePersonal,
         whereFilter,
         whereSearch,
-        startDate && endDate ? { date: { gte: startDate, lte: endDate } } : {},
       ],
     },
     select: {
