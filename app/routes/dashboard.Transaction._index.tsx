@@ -42,6 +42,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  const userId = await requireUserId(request);
   const searchParams = new URL(request.url).searchParams as any;
   const { filter, search, start, end, personal } = Object.fromEntries(
     searchParams.entries(),
@@ -62,6 +63,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     startDate,
     endDate,
     isPersonal,
+    userId,
   );
   const categories = await getCategoryListItems();
 
