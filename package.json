@@ -31,6 +31,8 @@
     "@headlessui/react": "^1.7.18",
     "@heroicons/react": "^2.1.1",
     "@prisma/client": "^5.9.1",
+    "@remix-pwa/push": "1.0.9",
+    "@remix-pwa/sw": "2.1.12",
     "@remix-run/css-bundle": "2.6.0",
     "@remix-run/node": "2.6.0",
     "@remix-run/react": "2.6.0",
