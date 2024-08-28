@@ -3,7 +3,9 @@ import { useMemo } from "react";
 
 import type { User } from "~/models/user.server";
 import {
+  getInstallmentsTotal,
   getTotalSpent,
+  getUserInstallments,
   getUserSpentOnPanini,
   getUserTotalSpent,
 } from "./models/dashboard/Transaction.server";
@@ -117,16 +119,16 @@ export async function getUserBalance(userId: string) {
   const totalSpent = await getTotalSpent();
   const spentOnPanini = await getUserSpentOnPanini(userId);
   const paniniPaymentsToUser = await getPaniniTotalPaymentToUser(userId);
-  // const installmentsTotal = await getInstallmentsTotal();
-  // const totalUserInstallments = await getUserInstallments(userId);
+  const installmentsTotal = await getInstallmentsTotal();
+  const totalUserInstallments = await getUserInstallments(userId);
 
   const totalPerUser = Dinero({
     amount: totalSpent,
   }).divide(2);
 
-  // const totalInstallmentsPerUser = Dinero({
-  //   amount: installmentsTotal,
-  // }).divide(2);
+  const totalInstallmentsPerUser = Dinero({
+    amount: installmentsTotal,
+  }).divide(2);
 
   const paymentsBalance = Dinero({ amount: payments.sent }).subtract(
     Dinero({ amount: payments.received }),
@@ -134,9 +136,9 @@ export async function getUserBalance(userId: string) {
 
   const userBalance = Dinero({ amount: transactions })
     .add(paymentsBalance)
-    .subtract(totalPerUser);
-  // .add(Dinero({ amount: totalUserInstallments }))
-  // .subtract(totalInstallmentsPerUser);
+    .subtract(totalPerUser)
+    .add(Dinero({ amount: totalUserInstallments }))
+    .subtract(totalInstallmentsPerUser);
 
   const paniniBalance = Dinero({ amount: spentOnPanini }).subtract(
     Dinero({ amount: paniniPaymentsToUser }),

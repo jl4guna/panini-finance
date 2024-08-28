@@ -299,7 +299,7 @@ export async function getInstallmentsTotal() {
       acc +
       Dinero({ amount: installment.amount })
         .divide(installment.installments)
-        .multiply(installment.paid + 1)
+        .multiply(installment.installments - installment.paid)
         .getAmount(),
     0,
   );
@@ -318,7 +318,7 @@ export async function getUserInstallments(userId: string) {
       acc +
       Dinero({ amount: installment.amount })
         .divide(installment.installments)
-        .multiply(installment.paid + 1)
+        .multiply(installment.installments - installment.paid)
         .getAmount(),
     0,
   );

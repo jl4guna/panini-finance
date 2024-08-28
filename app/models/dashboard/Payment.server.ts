@@ -59,21 +59,23 @@ export async function createPayment({
 
   let firstPaymentOfTheMonth = true;
 
-  //get the latest payment
+  // Obtener el primer día del mes actual
+  const firstDayOfMonth = new Date();
+  firstDayOfMonth.setDate(1);
+  firstDayOfMonth.setHours(0, 0, 0, 0);
+
+  // Obtener el último pago desde el inicio del mes actual
   const latestPayment = await prisma.payment.findFirst({
+    where: {
+      createdAt: {
+        gte: firstDayOfMonth,
+      },
+    },
     orderBy: { createdAt: "desc" },
   });
 
-  // check if the latest payment was less than 21 days ago
   if (latestPayment) {
-    const now = new Date();
-    const latest = new Date(latestPayment.createdAt);
-    const diff = now.getTime() - latest.getTime();
-    const days = diff / (1000 * 3600 * 24);
-
-    if (days < 21) {
-      firstPaymentOfTheMonth = false;
-    }
+    firstPaymentOfTheMonth = false;
   }
 
   if (panini) {
