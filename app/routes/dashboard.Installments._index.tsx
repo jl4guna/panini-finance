@@ -54,16 +54,21 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const category = categories.find((c) => c.name === filter);
 
+  const totalToPay = transactions.reduce((acc, transaction) => {
+    return acc + Math.round(transaction.amount / transaction.installments);
+  }, 0);
+
   return json({
     transactions,
     categories,
     category,
     search,
     isPersonal,
+    totalToPay,
   });
 }
 export default function Transaction() {
-  const { transactions, categories, category, search, isPersonal } =
+  const { transactions, categories, category, search, isPersonal, totalToPay } =
     useLoaderData<typeof loader>();
   const navigate = useNavigate();
   const [filter, setFilter] = useState(category?.name);
@@ -109,10 +114,12 @@ export default function Transaction() {
         <div className="flex items-center justify-between">
           <div className="sm:flex-auto">
             <h1 className="text-xl font-semibold text-gray-900">
-              Gastos a Meses
+              Gastos a Meses{" "}
+              {Dinero({ amount: totalToPay }).toFormat("$0,0.00")}
             </h1>
             <p className="mt-2 text-sm text-gray-700">
-              Registro de gastos a meses
+              Total a pagar a meses por persona:{" "}
+              {Dinero({ amount: totalToPay }).divide(2).toFormat("$0,0.00")}
             </p>
           </div>
           <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
